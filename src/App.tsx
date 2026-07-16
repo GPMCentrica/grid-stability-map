@@ -65,6 +65,7 @@ export default function App() {
     URL.revokeObjectURL(url)
   }
   const savedLabel = savedAt ? `Saved ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(savedAt))}` : 'Saving locally'
+  const networkLegend = [networkOptions.transmission && '220+ kV transmission', networkOptions.substations && 'substations', networkOptions.lowerVoltage && '110/132 kV lines'].filter(Boolean).join(' · ') || 'No network categories selected'
 
   const tabs: { id: WorkspaceView, label: string, icon: typeof Map }[] = [
     { id: 'map', label: 'Map', icon: Map }, { id: 'register', label: 'Register', icon: TableProperties }, { id: 'timeline', label: 'Timeline', icon: TimerReset }, { id: 'quality', label: 'Data quality', icon: Database },
@@ -93,14 +94,14 @@ export default function App() {
           {([{ id: 'none', label: 'Off' }, { id: 'inertia', label: 'Inertia' }, { id: 'scl', label: 'SCL' }, { id: 'voltage', label: 'Voltage' }] as const).map((layer) => <button key={layer.id} type="button" className={needLayer === layer.id ? 'active' : ''} onClick={() => setNeedLayer(layer.id)}>{layer.label}</button>)}
         </div>
         <button className={`network-layer-toggle ${networkLayer ? 'active' : ''}`} type="button" onClick={() => setNetworkLayer((current) => !current)} title="Show OpenStreetMap lines and substations"><Network size={15} />Network</button>
-        {networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: 'Transmission' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '132/220 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <button key={option.id} type="button" className={networkOptions[option.id] ? 'active' : ''} aria-pressed={networkOptions[option.id]} onClick={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))}>{option.label}</button>)}</div>}
+        {networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: '220+ kV' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '110/132 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <button key={option.id} type="button" className={networkOptions[option.id] ? 'active' : ''} aria-pressed={networkOptions[option.id]} onClick={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))}>{option.label}</button>)}</div>}
       </section>}
 
       {view === 'map' && <section className="map-workspace">
         <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} networkLayer={networkLayer} networkOptions={networkOptions} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={setSelectedPlant} />
         <DashboardPanel plants={filteredPlants} year={year} selectedPlant={selectedPlant} />
         <div className="map-legend" aria-label="Map legend">
-          {networkLayer ? <><span className="legend-title">Network data</span><span className="network-key" />Existing lines & substations<span className="network-key future" />Proposed / construction</> : needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">Screening need</span><span className="risk-key low" />Low<span className="risk-key medium" />Moderate<span className="risk-key high" />High</>}
+          {networkLayer ? <><span className="legend-title">Network data</span><span className="network-key" />{networkLegend}{networkOptions.future && <><span className="network-key future" />Proposed / construction</>}</> : needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">Screening need</span><span className="risk-key low" />Low<span className="risk-key medium" />Moderate<span className="risk-key high" />High</>}
         </div>
       </section>}
       {view === 'register' && <RegisterView plants={workbook.plants} filteredPlants={filteredPlants} filters={filters} onFiltersChange={setFilters} onSave={savePlant} onArchive={archivePlant} onDelete={deletePlant} onDuplicate={duplicatePlant} editingPlant={editingPlant} onEditingPlantHandled={() => setEditingPlant(undefined)} />}

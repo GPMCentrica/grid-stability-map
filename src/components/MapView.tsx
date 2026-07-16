@@ -38,6 +38,12 @@ function NetworkOverlay({ enabled, options }: { enabled: boolean, options: Netwo
     if (!vectorGrid) { setMessage('Vector network tiles are unavailable in this browser.'); return }
     const isFuture = (properties: Record<string, unknown>) => Boolean(properties.construction || properties.proposed || properties.power === 'construction' || properties.power === 'proposed')
     const voltage = (properties: Record<string, unknown>) => Number(String(properties.voltage ?? '').split(';')[0])
+    const substationStyle = (properties: Record<string, unknown>) => {
+      if (!options.substations) return []
+      const future = isFuture(properties)
+      if (future && !options.future) return []
+      return { color: future ? '#825bb0' : '#285a86', fillColor: future ? '#825bb0' : '#285a86', weight: 1.5, fillOpacity: .5, radius: 4 }
+    }
     const layer = vectorGrid.protobuf('https://openinframap.org/tiles/{z}/{x}/{y}.pbf', {
       interactive: false,
       maxNativeZoom: 17,
@@ -46,17 +52,28 @@ function NetworkOverlay({ enabled, options }: { enabled: boolean, options: Netwo
           const future = isFuture(properties)
           const level = voltage(properties)
           if (future && !options.future) return []
-          if (level >= 275000 && options.transmission) return { color: future ? '#825bb0' : '#285a86', weight: level >= 400000 ? 3.5 : 2.8, opacity: .9, dashArray: future ? '7 7' : undefined }
-          if (level >= 110000 && options.lowerVoltage) return { color: future ? '#825bb0' : '#5f8aa7', weight: 1.6, opacity: .75, dashArray: future ? '6 6' : undefined }
+          if (level >= 220 && options.transmission) return { color: future ? '#825bb0' : '#285a86', weight: level >= 400 ? 3.5 : 2.8, opacity: .9, dashArray: future ? '7 7' : undefined }
+          if (level >= 110 && level < 220 && options.lowerVoltage) return { color: future ? '#825bb0' : '#5f8aa7', weight: 1.6, opacity: .75, dashArray: future ? '6 6' : undefined }
           return []
         },
-        power_substation: (properties: Record<string, unknown>) => {
-          if (!options.substations) return []
-          const future = isFuture(properties)
-          if (future && !options.future) return []
-          return { color: future ? '#825bb0' : '#285a86', fillColor: future ? '#825bb0' : '#285a86', weight: 1.5, fillOpacity: .5, radius: 4 }
-        },
+        power_substation: substationStyle,
+        power_substation_point: substationStyle,
         power_tower: () => [],
+        power_plant: () => [],
+        power_plant_point: () => [],
+        power_generator: () => [],
+        power_generator_area: () => [],
+        power_heatmap_solar: () => [],
+        power_transformer: () => [],
+        power_compensator: () => [],
+        power_switch: () => [],
+        telecoms_communication_line: () => [],
+        telecoms_data_center: () => [],
+        telecoms_mast: () => [],
+        petroleum_pipeline: () => [],
+        petroleum_well: () => [],
+        petroleum_site: () => [],
+        water_pipeline: () => [],
       },
     })
     layer.addTo(map)

@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { Check, Database, Download, Map, Moon, Sun, TableProperties, TimerReset } from 'lucide-react'
+import { Check, Database, Download, Map, Moon, Network, Sun, TableProperties, TimerReset } from 'lucide-react'
 import { DashboardPanel } from './components/DashboardPanel'
 import { DataQualityView } from './components/DataQualityView'
 import { MapView } from './components/MapView'
@@ -9,7 +9,7 @@ import { TimelineView } from './components/TimelineView'
 import { WorkspaceFilters } from './components/WorkspaceFilters'
 import { defaultRegister } from './data/default-register'
 import { filterPlants, loadWorkspaceSnapshot, saveWorkspace } from './lib/workspace'
-import type { HorizonYear, NeedLayer, PlaceResult, Plant, WorkbookData } from './models'
+import type { HorizonYear, NeedLayer, NetworkLayerOptions, PlaceResult, Plant, WorkbookData } from './models'
 import { emptyWorkspaceFilters, type WorkspaceFilters as FilterState } from './models'
 
 const years: HorizonYear[] = [2026, 2030, 2040, 2050]
@@ -24,12 +24,13 @@ export default function App() {
   const [savedAt, setSavedAt] = useState(workspaceSnapshot?.savedAt ?? '')
   const [year, setYear] = useState<HorizonYear>(2030)
   const [needLayer, setNeedLayer] = useState<NeedLayer>('none')
+  const [networkLayer, setNetworkLayer] = useState(false)
+  const [networkOptions, setNetworkOptions] = useState<NetworkLayerOptions>({ transmission: true, substations: false, lowerVoltage: false, future: false })
   const [filters, setFilters] = useState<FilterState>(emptyWorkspaceFilters)
   const [selectedPlant, setSelectedPlant] = useState<Plant>()
   const [editingPlant, setEditingPlant] = useState<Plant>()
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult>()
   const [view, setView] = useState<WorkspaceView>('map')
-  const [notice] = useState('Local retirement register loaded. Changes are saved in this browser.')
   const [theme, setTheme] = useState<Theme>(() => localStorage.getItem('grid-stability-theme') === 'dark' ? 'dark' : 'light')
   const deferredQuery = useDeferredValue(filters.query)
 
@@ -91,14 +92,15 @@ export default function App() {
           <span>Need overlay</span>
           {([{ id: 'none', label: 'Off' }, { id: 'inertia', label: 'Inertia' }, { id: 'scl', label: 'SCL' }, { id: 'voltage', label: 'Voltage' }] as const).map((layer) => <button key={layer.id} type="button" className={needLayer === layer.id ? 'active' : ''} onClick={() => setNeedLayer(layer.id)}>{layer.label}</button>)}
         </div>
-        <p className="import-status">{notice}</p>
+        <button className={`network-layer-toggle ${networkLayer ? 'active' : ''}`} type="button" onClick={() => setNetworkLayer((current) => !current)} title="Show OpenStreetMap lines and substations"><Network size={15} />Network</button>
+        {networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: 'Transmission' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '132/220 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <label key={option.id}><input type="checkbox" checked={networkOptions[option.id]} onChange={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))} />{option.label}</label>)}</div>}
       </section>}
 
       {view === 'map' && <section className="map-workspace">
-        <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={setSelectedPlant} />
+        <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} networkLayer={networkLayer} networkOptions={networkOptions} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={setSelectedPlant} />
         <DashboardPanel plants={filteredPlants} year={year} selectedPlant={selectedPlant} />
         <div className="map-legend" aria-label="Map legend">
-          {needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">Screening need</span><span className="risk-key low" />Low<span className="risk-key medium" />Moderate<span className="risk-key high" />High</>}
+          {networkLayer ? <><span className="legend-title">Network data</span><span className="network-key" />Existing lines & substations<span className="network-key future" />Proposed / construction</> : needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">Screening need</span><span className="risk-key low" />Low<span className="risk-key medium" />Moderate<span className="risk-key high" />High</>}
         </div>
       </section>}
       {view === 'register' && <RegisterView plants={workbook.plants} filteredPlants={filteredPlants} filters={filters} onFiltersChange={setFilters} onSave={savePlant} onArchive={archivePlant} onDelete={deletePlant} onDuplicate={duplicatePlant} editingPlant={editingPlant} onEditingPlantHandled={() => setEditingPlant(undefined)} />}

@@ -3,6 +3,12 @@ export type RiskLevel = 'low' | 'medium' | 'high'
 export type RetiredAssetMode = 'hide' | 'fade'
 export type PlantStatus = 'Active' | 'Retiring' | 'Retired' | 'Archived'
 export type NeedLayer = 'none' | 'inertia' | 'scl' | 'voltage'
+export interface NetworkLayerOptions {
+  transmission: boolean
+  substations: boolean
+  lowerVoltage: boolean
+  future: boolean
+}
 export type RetirementBasis = 'Confirmed' | 'Modelled' | 'Unconfirmed'
 
 export interface Coordinates {

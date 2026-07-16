@@ -73,7 +73,7 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, fo
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <ZoomControl position="bottomright" />
+      <ZoomControl position="topright" />
       <PlantFocus plant={focusedPlant} place={focusedPlace} />
       {locationNeeds.map((location) => <Circle key={`${activeNeedLayer}-${location.nodeId}`} center={[location.latitude, location.longitude]} radius={16000 + location.need * 76000} pathOptions={{ color: needColour(location.need), weight: 1.5, fillColor: needColour(location.need), fillOpacity: 0.08 + location.need * 0.2 }}>
         <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Total local capacity</dt><dd>{formatMw(location.totalMw)}</dd></div></dl></div></Popup>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CalendarClock, MapPinned, Zap } from 'lucide-react'
 import type { HorizonYear, Plant } from '../models'
-import { formatMw, isRetiredByYear } from '../lib/risk'
+import { effectiveRetirementYear, formatMw, isRetiredByYear, retirementLabel } from '../lib/risk'
 
 interface DashboardPanelProps {
   plants: Plant[]
@@ -20,7 +20,9 @@ export function DashboardPanel({ plants, year, selectedPlant }: DashboardPanelPr
   const locationPlants = selectedPlant ? plants.filter((plant) => plant.nodeId === selectedPlant.nodeId) : []
   const locationName = selectedPlant?.nodeName || selectedPlant?.nodeId
   const locationRetiringMw = locationPlants.filter((plant) => isRetiredByYear(plant, year)).reduce((sum, plant) => sum + plant.netMw, 0)
-  const locationNextRetirement = [...locationPlants].filter((plant) => plant.retirementDate).sort((left, right) => (left.retirementDate ?? '').localeCompare(right.retirementDate ?? ''))[0]
+  const locationNextRetirement = [...locationPlants].filter((plant) => effectiveRetirementYear(plant)).sort((left, right) => (effectiveRetirementYear(left) ?? 9999) - (effectiveRetirementYear(right) ?? 9999))[0]
+  const localCapacity = locationPlants.reduce((sum, plant) => sum + plant.netMw, 0)
+  const selectedShare = selectedPlant && localCapacity ? Math.round(selectedPlant.netMw / localCapacity * 100) : 0
 
   return (
     <aside className="dashboard-panel" style={{ left: position.left, top: position.top }} aria-label="Grid stability dashboard">
@@ -36,9 +38,10 @@ export function DashboardPanel({ plants, year, selectedPlant }: DashboardPanelPr
 
       {selectedPlant && (
         <section className="location-summary">
-          <header><div><span>Selected location</span><strong>{locationName}</strong></div><b>{formatMw(locationPlants.reduce((sum, plant) => sum + plant.netMw, 0))}</b></header>
-          <div className="location-facts"><span><i>By {year}</i><strong>{formatMw(locationRetiringMw)}</strong></span><span><i>Next retirement</i><strong>{locationNextRetirement?.retirementDate ?? 'Unconfirmed'}</strong></span></div>
-          <div className="location-assets">{locationPlants.sort((left, right) => (left.retirementDate ?? '9999').localeCompare(right.retirementDate ?? '9999')).slice(0, 4).map((plant) => <div key={plant.assetId}><span>{plant.name}</span><b>{formatMw(plant.netMw)}</b><small>{plant.retirementDate ?? 'Date unconfirmed'}</small></div>)}</div>
+          <header><div><span>Selected site</span><strong>{selectedPlant.name}</strong><small>{locationName} · {selectedPlant.region}</small></div><b>{formatMw(selectedPlant.netMw)}</b></header>
+          <div className="selected-site-outlook"><div><i>Retirement outlook</i><strong>{retirementLabel(selectedPlant)}</strong>{selectedPlant.retirementBasis === 'Modelled' && selectedPlant.modelledRetirementReason && <small>{selectedPlant.modelledRetirementReason}</small>}</div><div><i>Confidence</i><strong>{selectedPlant.confidenceScore ?? 'Not scored'}{selectedPlant.confidenceScore ? '/100' : ''}</strong><small>{selectedPlant.evidenceSource || 'No evidence source recorded'}</small></div></div>
+          <div className="location-facts"><span><i>By {year}</i><strong>{formatMw(locationRetiringMw)}</strong></span><span><i>Local capacity share</i><strong>{selectedShare}%</strong></span><span><i>Next at location</i><strong>{locationNextRetirement ? `${locationNextRetirement.name} · ${effectiveRetirementYear(locationNextRetirement)}` : 'Unconfirmed'}</strong></span></div>
+          <div className="location-assets">{locationPlants.sort((left, right) => (effectiveRetirementYear(left) ?? 9999) - (effectiveRetirementYear(right) ?? 9999)).slice(0, 4).map((plant) => <div key={plant.assetId} className={plant.assetId === selectedPlant.assetId ? 'selected-asset' : ''}><span>{plant.name}</span><b>{formatMw(plant.netMw)}</b><small>{retirementLabel(plant)}</small></div>)}</div>
         </section>
       )}
 

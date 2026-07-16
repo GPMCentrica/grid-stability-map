@@ -93,7 +93,7 @@ export default function App() {
           {([{ id: 'none', label: 'Off' }, { id: 'inertia', label: 'Inertia' }, { id: 'scl', label: 'SCL' }, { id: 'voltage', label: 'Voltage' }] as const).map((layer) => <button key={layer.id} type="button" className={needLayer === layer.id ? 'active' : ''} onClick={() => setNeedLayer(layer.id)}>{layer.label}</button>)}
         </div>
         <button className={`network-layer-toggle ${networkLayer ? 'active' : ''}`} type="button" onClick={() => setNetworkLayer((current) => !current)} title="Show OpenStreetMap lines and substations"><Network size={15} />Network</button>
-        {networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: 'Transmission' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '132/220 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <label key={option.id}><input type="checkbox" checked={networkOptions[option.id]} onChange={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))} />{option.label}</label>)}</div>}
+        {networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: 'Transmission' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '132/220 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <button key={option.id} type="button" className={networkOptions[option.id] ? 'active' : ''} aria-pressed={networkOptions[option.id]} onClick={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))}>{option.label}</button>)}</div>}
       </section>}
 
       {view === 'map' && <section className="map-workspace">

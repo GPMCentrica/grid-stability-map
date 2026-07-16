@@ -45,16 +45,18 @@ function NetworkOverlay({ enabled, options }: { enabled: boolean, options: Netwo
         power_line: (properties: Record<string, unknown>) => {
           const future = isFuture(properties)
           const level = voltage(properties)
-          if (future && !options.future) return { opacity: 0, weight: 0 }
+          if (future && !options.future) return []
           if (level >= 275000 && options.transmission) return { color: future ? '#825bb0' : '#285a86', weight: level >= 400000 ? 3.5 : 2.8, opacity: .9, dashArray: future ? '7 7' : undefined }
           if (level >= 110000 && options.lowerVoltage) return { color: future ? '#825bb0' : '#5f8aa7', weight: 1.6, opacity: .75, dashArray: future ? '6 6' : undefined }
-          return { opacity: 0, weight: 0 }
+          return []
         },
         power_substation: (properties: Record<string, unknown>) => {
-          if (!options.substations) return { opacity: 0, fillOpacity: 0, radius: 0 }
+          if (!options.substations) return []
           const future = isFuture(properties)
+          if (future && !options.future) return []
           return { color: future ? '#825bb0' : '#285a86', fillColor: future ? '#825bb0' : '#285a86', weight: 1.5, fillOpacity: .5, radius: 4 }
         },
+        power_tower: () => [],
       },
     })
     layer.addTo(map)

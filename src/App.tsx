@@ -98,7 +98,7 @@ export default function App() {
       </section>}
 
       {view === 'map' && <section className="map-workspace">
-        <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} networkLayer={networkLayer} networkOptions={networkOptions} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={setSelectedPlant} />
+        <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} networkLayer={networkLayer} networkOptions={networkOptions} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={(plant) => setSelectedPlant((current) => current?.assetId === plant?.assetId ? undefined : plant)} />
         <DashboardPanel plants={filteredPlants} year={year} selectedPlant={selectedPlant} />
         <div className="map-legend" aria-label="Map legend">
           {networkLayer ? <><span className="legend-title">Network data</span><span className="network-key" />{networkLegend}{networkOptions.future && <><span className="network-key future" />Proposed / construction</>}</> : needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">Screening need</span><span className="risk-key low" />Low<span className="risk-key medium" />Moderate<span className="risk-key high" />High</>}

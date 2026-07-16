@@ -100,6 +100,8 @@ button { cursor: pointer; }
 .place-results { z-index: 3200; }
 .map-workspace { z-index: 1; }
 .dashboard-panel { top: unset; left: unset; }
+.dashboard-panel { scrollbar-width: none; -ms-overflow-style: none; }
+.dashboard-panel::-webkit-scrollbar { display: none; }
 .panel-drag-handle { cursor: grab; touch-action: none; }
 .panel-drag-handle:active { cursor: grabbing; }
 

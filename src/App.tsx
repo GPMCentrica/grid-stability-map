@@ -26,6 +26,7 @@ export default function App() {
   const [needLayer, setNeedLayer] = useState<NeedLayer>('none')
   const [filters, setFilters] = useState<FilterState>(emptyWorkspaceFilters)
   const [selectedPlant, setSelectedPlant] = useState<Plant>()
+  const [editingPlant, setEditingPlant] = useState<Plant>()
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult>()
   const [view, setView] = useState<WorkspaceView>('map')
   const [notice] = useState('Local retirement register loaded. Changes are saved in this browser.')
@@ -52,7 +53,7 @@ export default function App() {
   const archivePlant = (assetId: string) => setWorkbook((current) => ({ ...current, plants: current.plants.map((plant) => plant.assetId === assetId ? { ...plant, status: 'Archived' } : plant) }))
   const deletePlant = (assetId: string) => { if (window.confirm('Delete this plant record from this browser workspace?')) setWorkbook((current) => ({ ...current, plants: current.plants.filter((plant) => plant.assetId !== assetId) })) }
   const duplicatePlant = (plant: Plant) => savePlant({ ...plant, assetId: crypto.randomUUID(), name: `${plant.name} copy`, status: 'Active' })
-  const resolveIssue = (plant: Plant) => { setFilters({ ...emptyWorkspaceFilters, query: plant.name }); setView('register') }
+  const resolveIssue = (plant: Plant) => { setFilters({ ...emptyWorkspaceFilters, query: plant.name }); setEditingPlant(plant); setView('register') }
   const downloadRegister = () => {
     const blob = new Blob([JSON.stringify(workbook.plants, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -100,7 +101,7 @@ export default function App() {
           {needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">Screening need</span><span className="risk-key low" />Low<span className="risk-key medium" />Moderate<span className="risk-key high" />High</>}
         </div>
       </section>}
-      {view === 'register' && <RegisterView plants={workbook.plants} filteredPlants={filteredPlants} filters={filters} onFiltersChange={setFilters} onSave={savePlant} onArchive={archivePlant} onDelete={deletePlant} onDuplicate={duplicatePlant} />}
+      {view === 'register' && <RegisterView plants={workbook.plants} filteredPlants={filteredPlants} filters={filters} onFiltersChange={setFilters} onSave={savePlant} onArchive={archivePlant} onDelete={deletePlant} onDuplicate={duplicatePlant} editingPlant={editingPlant} onEditingPlantHandled={() => setEditingPlant(undefined)} />}
       {view === 'timeline' && <section className="workspace-with-filter"><WorkspaceFilters plants={workbook.plants} filters={filters} onChange={setFilters} /><TimelineView plants={filteredPlants} /></section>}
       {view === 'quality' && <DataQualityView plants={workbook.plants.filter((plant) => plant.status !== 'Archived')} onEdit={resolveIssue} />}
     </main>

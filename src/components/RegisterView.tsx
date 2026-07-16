@@ -13,6 +13,8 @@ interface RegisterViewProps {
   onArchive: (assetId: string) => void
   onDelete: (assetId: string) => void
   onDuplicate: (plant: Plant) => void
+  editingPlant?: Plant
+  onEditingPlantHandled: () => void
 }
 
 const blankPlant = (): Plant => ({ assetId: crypto.randomUUID(), name: '', nodeId: '', nodeName: '', region: '', country: 'Great Britain', technology: '', netMw: 0, retirementDate: '', retirementBasis: 'Unconfirmed', retirementClass: 'Unclear', confidenceScore: 50, evidenceSource: '', notes: '', status: 'Active', latitude: 0, longitude: 0, hasCoordinates: false })
@@ -126,8 +128,14 @@ function PlantEditor({ initialPlant, plants, onClose, onSave }: { initialPlant: 
   )
 }
 
-export function RegisterView({ plants, filteredPlants, filters, onFiltersChange, onSave, onArchive, onDelete, onDuplicate }: RegisterViewProps) {
+export function RegisterView({ plants, filteredPlants, filters, onFiltersChange, onSave, onArchive, onDelete, onDuplicate, editingPlant, onEditingPlantHandled }: RegisterViewProps) {
   const [editorPlant, setEditorPlant] = useState<Plant>()
+  useEffect(() => {
+    if (editingPlant) {
+      setEditorPlant(editingPlant)
+      onEditingPlantHandled()
+    }
+  }, [editingPlant, onEditingPlantHandled])
   return (
     <section className="workspace-view register-view">
       <div className="view-heading"><div><p>Working register</p><h2>Plant retirement register</h2><span>{filteredPlants.length} of {plants.length} records</span></div><button className="primary-action" type="button" onClick={() => setEditorPlant(blankPlant())}><Plus size={16} />Add plant</button></div>

@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { Database, Map, Moon, RotateCcw, Sun, TableProperties, TimerReset } from 'lucide-react'
+import { Check, Database, Download, Map, Moon, Sun, TableProperties, TimerReset } from 'lucide-react'
 import { DashboardPanel } from './components/DashboardPanel'
 import { DataQualityView } from './components/DataQualityView'
 import { MapView } from './components/MapView'
@@ -8,7 +8,7 @@ import { RegisterView } from './components/RegisterView'
 import { TimelineView } from './components/TimelineView'
 import { WorkspaceFilters } from './components/WorkspaceFilters'
 import { defaultRegister } from './data/default-register'
-import { filterPlants, loadWorkspace, saveWorkspace } from './lib/workspace'
+import { filterPlants, loadWorkspaceSnapshot, saveWorkspace } from './lib/workspace'
 import type { HorizonYear, NeedLayer, PlaceResult, Plant, WorkbookData } from './models'
 import { emptyWorkspaceFilters, type WorkspaceFilters as FilterState } from './models'
 
@@ -19,14 +19,16 @@ type WorkspaceView = 'map' | 'register' | 'timeline' | 'quality'
 const createDefaultWorkspace = (): WorkbookData => structuredClone(defaultRegister)
 
 export default function App() {
-  const [workbook, setWorkbook] = useState<WorkbookData>(() => loadWorkspace() ?? createDefaultWorkspace())
+  const [workspaceSnapshot] = useState(() => loadWorkspaceSnapshot())
+  const [workbook, setWorkbook] = useState<WorkbookData>(() => workspaceSnapshot?.workbook ?? createDefaultWorkspace())
+  const [savedAt, setSavedAt] = useState(workspaceSnapshot?.savedAt ?? '')
   const [year, setYear] = useState<HorizonYear>(2030)
   const [needLayer, setNeedLayer] = useState<NeedLayer>('none')
   const [filters, setFilters] = useState<FilterState>(emptyWorkspaceFilters)
   const [selectedPlant, setSelectedPlant] = useState<Plant>()
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult>()
   const [view, setView] = useState<WorkspaceView>('map')
-  const [notice, setNotice] = useState('Local retirement register loaded. Changes are saved in this browser.')
+  const [notice] = useState('Local retirement register loaded. Changes are saved in this browser.')
   const [theme, setTheme] = useState<Theme>(() => localStorage.getItem('grid-stability-theme') === 'dark' ? 'dark' : 'light')
   const deferredQuery = useDeferredValue(filters.query)
 
@@ -35,7 +37,7 @@ export default function App() {
   }, [theme])
 
   useEffect(() => {
-    saveWorkspace(workbook)
+    setSavedAt(saveWorkspace(workbook))
   }, [workbook])
 
   const activeFilters = useMemo(() => ({ ...filters, query: deferredQuery }), [deferredQuery, filters])
@@ -51,13 +53,16 @@ export default function App() {
   const deletePlant = (assetId: string) => { if (window.confirm('Delete this plant record from this browser workspace?')) setWorkbook((current) => ({ ...current, plants: current.plants.filter((plant) => plant.assetId !== assetId) })) }
   const duplicatePlant = (plant: Plant) => savePlant({ ...plant, assetId: crypto.randomUUID(), name: `${plant.name} copy`, status: 'Active' })
   const resolveIssue = (plant: Plant) => { setFilters({ ...emptyWorkspaceFilters, query: plant.name }); setView('register') }
-  const resetWorkspace = () => {
-    if (!window.confirm('Replace all local edits with the built-in retirement register?')) return
-    setWorkbook(createDefaultWorkspace())
-    setFilters(emptyWorkspaceFilters)
-    setSelectedPlant(undefined)
-    setNotice('Local register reset to the built-in baseline.')
+  const downloadRegister = () => {
+    const blob = new Blob([JSON.stringify(workbook.plants, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `plant-register-${new Date().toISOString().slice(0, 10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
   }
+  const savedLabel = savedAt ? `Saved ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(savedAt))}` : 'Saving locally'
 
   const tabs: { id: WorkspaceView, label: string, icon: typeof Map }[] = [
     { id: 'map', label: 'Map', icon: Map }, { id: 'register', label: 'Register', icon: TableProperties }, { id: 'timeline', label: 'Timeline', icon: TimerReset }, { id: 'quality', label: 'Data quality', icon: Database },
@@ -68,7 +73,8 @@ export default function App() {
       <header className="app-header">
         <div className="brand-lockup"><span className="brand-mark">UK</span><div><p>Electricity system analysis</p><h1>Grid Stability Map</h1></div></div>
         <div className="import-actions">
-          <button className="icon-text-button reset-button" type="button" onClick={resetWorkspace} title="Reset local register to the built-in baseline"><RotateCcw size={16} />Reset data</button>
+          <span className="save-indicator" role="status"><Check size={14} />{savedLabel}</span>
+          <button className="icon-text-button backup-button" type="button" onClick={downloadRegister} title="Download all current plant register data"><Download size={16} />Backup data</button>
           <button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button>
         </div>
       </header>

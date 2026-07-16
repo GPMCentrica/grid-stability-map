@@ -2,17 +2,31 @@ import type { Plant, WorkbookData, WorkspaceFilters } from '../models'
 
 const storageKey = 'uk-grid-stability-workspace-v2'
 
-export function loadWorkspace() {
+interface WorkspaceSnapshot {
+  workbook: WorkbookData
+  savedAt: string
+}
+
+export function loadWorkspaceSnapshot(): WorkspaceSnapshot | undefined {
   try {
     const stored = localStorage.getItem(storageKey)
-    return stored ? JSON.parse(stored) as WorkbookData : undefined
+    if (!stored) return undefined
+    const parsed = JSON.parse(stored) as WorkbookData | WorkspaceSnapshot
+    if ('workbook' in parsed) return parsed
+    return { workbook: parsed, savedAt: '' }
   } catch {
     return undefined
   }
 }
 
+export function loadWorkspace() {
+  return loadWorkspaceSnapshot()?.workbook
+}
+
 export function saveWorkspace(workbook: WorkbookData) {
-  localStorage.setItem(storageKey, JSON.stringify(workbook))
+  const savedAt = new Date().toISOString()
+  localStorage.setItem(storageKey, JSON.stringify({ workbook, savedAt } satisfies WorkspaceSnapshot))
+  return savedAt
 }
 
 export function filterPlants(plants: Plant[], filters: WorkspaceFilters) {

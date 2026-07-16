@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Archive, Copy, LoaderCircle, MapPin, Pencil, Plus, Trash2, X } from 'lucide-react'
-import type { Plant, PlantStatus, RetirementBasis, WorkspaceFilters } from '../models'
+import type { Plant, RetirementBasis, WorkspaceFilters } from '../models'
 import { effectiveRetirementYear, formatMw, retirementLabel } from '../lib/risk'
 import { WorkspaceFilters as FilterControls } from './WorkspaceFilters'
 
@@ -106,10 +106,6 @@ function PlantEditor({ initialPlant, plants, onClose, onSave }: { initialPlant: 
           {plant.retirementBasis === 'Modelled' && <><label>Modelled retirement year<input type="number" min="2020" max="2100" value={plant.modelledRetirementYear ?? ''} onChange={(event) => update('modelledRetirementYear', Number(event.target.value))} /></label><label>Quick model reason<input value={plant.modelledRetirementReason ?? ''} onChange={(event) => update('modelledRetirementReason', event.target.value)} placeholder="e.g. asset age assumption" /></label></>}
           <label>Confidence score<input type="number" min="0" max="100" value={plant.confidenceScore ?? ''} onChange={(event) => update('confidenceScore', Number(event.target.value))} /></label>
           <details className="advanced-fields full-width"><summary>More details and manual overrides</summary><div className="advanced-grid">
-            <label>Plant ID<input value={plant.assetId} onChange={(event) => update('assetId', event.target.value)} /></label>
-            <label>Node ID<input value={plant.nodeId} onChange={(event) => update('nodeId', event.target.value)} placeholder={derivedNodeId(plant)} /></label>
-            <label>Retirement class<input value={plant.retirementClass ?? ''} onChange={(event) => update('retirementClass', event.target.value)} /></label>
-            <label>Status<select value={plant.status ?? 'Active'} onChange={(event) => update('status', event.target.value as PlantStatus)}><option>Active</option><option>Retiring</option><option>Retired</option><option>Archived</option></select></label>
             <label>Evidence / source<input value={plant.evidenceSource ?? ''} onChange={(event) => update('evidenceSource', event.target.value)} /></label>
             <label>Latitude<input type="number" step="any" value={plant.latitude || ''} onChange={(event) => update('latitude', Number(event.target.value))} /></label>
             <label>Longitude<input type="number" step="any" value={plant.longitude || ''} onChange={(event) => update('longitude', Number(event.target.value))} /></label>

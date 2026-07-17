@@ -7,14 +7,35 @@ export interface LocationNeed {
   latitude: number
   longitude: number
   need: number
+  retiringService: number
+  totalService: number
   retiringMw: number
   totalMw: number
 }
 
+interface TechnologyProvision {
+  inertia: number
+  scl: number
+  voltage: number
+}
+
+const technologyProvisions: { match: RegExp, provision: TechnologyProvision }[] = [
+  { match: /pumped storage/, provision: { inertia: 5.5, scl: 3.2, voltage: 0.65 } },
+  { match: /\bhydro\b/, provision: { inertia: 4.8, scl: 3, voltage: 0.55 } },
+  { match: /nuclear/, provision: { inertia: 6, scl: 3.8, voltage: 0.5 } },
+  { match: /ccgt/, provision: { inertia: 4.5, scl: 3, voltage: 0.45 } },
+  { match: /ocgt|gas turbine/, provision: { inertia: 3.5, scl: 2.5, voltage: 0.4 } },
+  { match: /chp/, provision: { inertia: 4, scl: 2.8, voltage: 0.45 } },
+  { match: /biomass|waste|coal|steam turbine/, provision: { inertia: 5, scl: 3.2, voltage: 0.5 } },
+  { match: /wind|solar/, provision: { inertia: 0, scl: 0.15, voltage: 0.3 } },
+  { match: /battery|bess/, provision: { inertia: 0, scl: 0.1, voltage: 0.5 } },
+]
+
+const defaultProvision: TechnologyProvision = { inertia: 3.5, scl: 2.5, voltage: 0.35 }
+
 const proxyFor = (plant: Plant, layer: Exclude<NeedLayer, 'none'>) => {
-  if (layer === 'inertia') return plant.inertiaProxy ?? plant.netMw * 5
-  if (layer === 'scl') return plant.faultLevelProxy ?? plant.netMw * 1.1
-  return plant.reactiveProxy ?? plant.netMw * 0.33
+  const profile = technologyProvisions.find(({ match }) => match.test(plant.technology.toLowerCase()))?.provision ?? defaultProvision
+  return plant.netMw * profile[layer]
 }
 
 export function getLocationNeeds(plants: Plant[], year: HorizonYear, layer: Exclude<NeedLayer, 'none'>): LocationNeed[] {
@@ -34,6 +55,8 @@ export function getLocationNeeds(plants: Plant[], year: HorizonYear, layer: Excl
       latitude: reference.latitude,
       longitude: reference.longitude,
       need: retiredService / totalService,
+      retiringService: retiredService,
+      totalService,
       retiringMw,
       totalMw: locationPlants.reduce((sum, plant) => sum + plant.netMw, 0),
     }]

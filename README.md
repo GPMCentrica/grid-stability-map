@@ -37,9 +37,9 @@ Run the following from the project folder only when the approved workbook or coo
 
 The map includes optional **Inertia**, **SCL**, and **Voltage** need overlays. They are retirement-driven local screening surfaces, not a substitute for a full network study.
 
-- Each node compares service proxy retiring by the selected horizon against total proxy in the local plant register.
-- Inertia uses the stored inertia proxy, SCL uses the fault-level proxy, and Voltage uses the reactive-power proxy. If a proxy is unavailable, the app derives it from MW using the existing register factors.
-- The overlays label locations as low, moderate, or high screening need. Their purpose is to direct analytical attention, not to set operational limits or investment decisions.
+- Each node compares the assumed technical provision retiring by the selected horizon against total assumed provision in the local plant register. Marker size represents absolute assumed provision lost; colour represents the local share lost.
+- Each technology is assigned a transparent per-MW screening profile. Synchronous thermal plant, nuclear, hydro, pumped storage, wind, solar, and battery assets therefore do not receive the same Inertia, SCL, or Voltage contribution.
+- The overlays label locations as low, moderate, or high screening need. They are technology-assumption screening proxies, not measured inertia, fault level, reactive margin, operational limits, or investment decisions.
 
 The built-in baseline currently contains Great Britain records only. Use **Merge CSV** to create an internal combined register for Ireland, Northern Ireland, or Republic of Ireland data without changing that baseline. The CSV must include `asset_id`, `plant_name`, `node_id`, `node_substation`, `country`, `region`, `technology`, `net_mw`, `status`, `latitude`, and `longitude`; retirement, evidence, proxy, and quality-note columns are imported when present.
 

@@ -1,7 +1,7 @@
 import { divIcon } from 'leaflet'
 import L from 'leaflet'
 import { useEffect, useState } from 'react'
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet.vectorgrid'
 import { getLocationNeeds, needColour, needLabel } from '../lib/need'
 import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, RetiredAssetMode } from '../models'
@@ -131,6 +131,8 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
   const activeNeedLayer = needLayer === 'none' ? undefined : needLayer
   const locationNeeds = activeNeedLayer ? getLocationNeeds(plants, year, activeNeedLayer) : []
   const layerLabel = activeNeedLayer === 'scl' ? 'Short-circuit level' : activeNeedLayer === 'voltage' ? 'Voltage support' : 'Inertia'
+  const serviceUnit = activeNeedLayer === 'inertia' ? 'MWs proxy' : activeNeedLayer === 'scl' ? 'SCL proxy' : 'MVAr proxy'
+  const largestServiceLoss = Math.max(1, ...locationNeeds.map((location) => location.retiringService))
 
   return (
     <MapContainer center={[55.4, -3.2]} zoom={5.7} minZoom={5} zoomControl={false} className="map-canvas">
@@ -142,9 +144,9 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
       <PlantFocus plant={focusedPlant} place={focusedPlace} />
       <MapClickDeselect onDeselect={() => onPlantSelect()} />
       <NetworkOverlay enabled={networkLayer} options={networkOptions} />
-      {locationNeeds.map((location) => <Circle key={`${activeNeedLayer}-${location.nodeId}`} center={[location.latitude, location.longitude]} radius={16000 + location.need * 76000} pathOptions={{ color: needColour(location.need), weight: 1.5, fillColor: needColour(location.need), fillOpacity: 0.08 + location.need * 0.2 }}>
-        <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Total local capacity</dt><dd>{formatMw(location.totalMw)}</dd></div></dl></div></Popup>
-      </Circle>)}
+      {locationNeeds.map((location) => <CircleMarker key={`${activeNeedLayer}-${location.nodeId}`} center={[location.latitude, location.longitude]} radius={7 + 18 * Math.sqrt(location.retiringService / largestServiceLoss)} pathOptions={{ color: needColour(location.need), weight: 1.5, fillColor: needColour(location.need), fillOpacity: 0.16 + location.need * 0.28 }}>
+        <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Estimated provision lost</dt><dd>{new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(location.retiringService)} {serviceUnit}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Basis</dt><dd>Technology provision assumptions</dd></div></dl></div></Popup>
+      </CircleMarker>)}
       {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} /></Popup></Marker>)}
     </MapContainer>
   )

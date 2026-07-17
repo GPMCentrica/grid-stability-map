@@ -1,7 +1,7 @@
 import { divIcon } from 'leaflet'
 import L from 'leaflet'
 import { useEffect, useState } from 'react'
-import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { Circle, CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet.vectorgrid'
 import { getLocationNeeds, needColour, needLabel } from '../lib/need'
 import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, RetiredAssetMode } from '../models'
@@ -132,6 +132,7 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
   const locationNeeds = activeNeedLayer ? getLocationNeeds(plants, year, activeNeedLayer) : []
   const layerLabel = activeNeedLayer === 'scl' ? 'Short-circuit level' : activeNeedLayer === 'voltage' ? 'Voltage support' : 'Inertia'
   const serviceUnit = activeNeedLayer === 'inertia' ? 'MWs proxy' : activeNeedLayer === 'scl' ? 'SCL proxy' : 'MVAr proxy'
+  const footprintRangeKm = activeNeedLayer === 'scl' ? [25, 50] : activeNeedLayer === 'voltage' ? [50, 100] : [100, 250]
   const largestServiceLoss = Math.max(1, ...locationNeeds.map((location) => location.retiringService))
 
   return (
@@ -144,9 +145,16 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
       <PlantFocus plant={focusedPlant} place={focusedPlace} />
       <MapClickDeselect onDeselect={() => onPlantSelect()} />
       <NetworkOverlay enabled={networkLayer} options={networkOptions} />
-      {locationNeeds.map((location) => <CircleMarker key={`${activeNeedLayer}-${location.nodeId}`} center={[location.latitude, location.longitude]} radius={7 + 18 * Math.sqrt(location.retiringService / largestServiceLoss)} pathOptions={{ color: needColour(location.need), weight: 1.5, fillColor: needColour(location.need), fillOpacity: 0.16 + location.need * 0.28 }}>
-        <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Estimated provision lost</dt><dd>{new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(location.retiringService)} {serviceUnit}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Basis</dt><dd>Technology provision assumptions</dd></div></dl></div></Popup>
-      </CircleMarker>)}
+      {locationNeeds.map((location) => {
+        const footprintKm = footprintRangeKm[0] + (footprintRangeKm[1] - footprintRangeKm[0]) * location.need
+        const colour = needColour(location.need)
+        return <>
+          <Circle key={`${activeNeedLayer}-${location.nodeId}-footprint`} center={[location.latitude, location.longitude]} radius={footprintKm * 1000} interactive={false} pathOptions={{ color: colour, weight: 1, opacity: 0.38, fillColor: colour, fillOpacity: 0.035 + location.need * 0.06 }} />
+          <CircleMarker key={`${activeNeedLayer}-${location.nodeId}`} center={[location.latitude, location.longitude]} radius={7 + 18 * Math.sqrt(location.retiringService / largestServiceLoss)} pathOptions={{ color: colour, weight: 1.5, fillColor: colour, fillOpacity: 0.16 + location.need * 0.28 }}>
+            <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Estimated provision lost</dt><dd>{new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(location.retiringService)} {serviceUnit}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Assumed service footprint</dt><dd>{Math.round(footprintKm)} km</dd></div><div><dt>Basis</dt><dd>Technology and locality assumptions</dd></div></dl></div></Popup>
+          </CircleMarker>
+        </>
+      })}
       {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} /></Popup></Marker>)}
     </MapContainer>
   )

@@ -1,5 +1,5 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { Check, Database, Download, Map, Moon, Network, Sun, TableProperties, TimerReset } from 'lucide-react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { Check, Database, Download, Map, Moon, Network, Sun, TableProperties, TimerReset, Upload } from 'lucide-react'
 import { DashboardPanel } from './components/DashboardPanel'
 import { DataQualityView } from './components/DataQualityView'
 import { MapView } from './components/MapView'
@@ -8,7 +8,7 @@ import { RegisterView } from './components/RegisterView'
 import { TimelineView } from './components/TimelineView'
 import { WorkspaceFilters } from './components/WorkspaceFilters'
 import { defaultRegister } from './data/default-register'
-import { filterPlants, loadWorkspaceSnapshot, saveWorkspace } from './lib/workspace'
+import { filterPlants, loadWorkspaceSnapshot, parsePlantBackup, saveWorkspace } from './lib/workspace'
 import type { HorizonYear, NeedLayer, NetworkLayerOptions, PlaceResult, Plant, WorkbookData } from './models'
 import { emptyWorkspaceFilters, type WorkspaceFilters as FilterState } from './models'
 
@@ -32,6 +32,7 @@ export default function App() {
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult>()
   const [view, setView] = useState<WorkspaceView>('map')
   const [theme, setTheme] = useState<Theme>(() => localStorage.getItem('grid-stability-theme') === 'dark' ? 'dark' : 'light')
+  const backupInputRef = useRef<HTMLInputElement>(null)
   const deferredQuery = useDeferredValue(filters.query)
 
   useEffect(() => {
@@ -64,6 +65,19 @@ export default function App() {
     link.click()
     URL.revokeObjectURL(url)
   }
+  const restoreRegister = async (file?: File) => {
+    if (!file) return
+    try {
+      const plants = parsePlantBackup(JSON.parse(await file.text()))
+      if (!window.confirm(`Replace the current local register with ${plants.length} records from ${file.name}?`)) return
+      setWorkbook({ plants, riskNodes: [], importedFileName: `Restored from ${file.name}` })
+      setSelectedPlant(undefined)
+      setEditingPlant(undefined)
+      setSelectedPlace(undefined)
+    } catch (error) {
+      window.alert(error instanceof Error ? `Backup was not restored: ${error.message}` : 'Backup was not restored.')
+    }
+  }
   const savedLabel = savedAt ? `Saved ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(savedAt))}` : 'Saving locally'
   const networkLegend = [networkOptions.transmission && '220+ kV transmission', networkOptions.substations && 'substations', networkOptions.lowerVoltage && '110/132 kV lines'].filter(Boolean).join(' · ') || 'No network categories selected'
 
@@ -77,6 +91,8 @@ export default function App() {
         <div className="brand-lockup"><span className="brand-mark">UK</span><div><p>Electricity system analysis</p><h1>Grid Stability Map</h1></div></div>
         <div className="import-actions">
           <span className="save-indicator" role="status"><Check size={14} />{savedLabel}</span>
+          <input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void restoreRegister(file) }} />
+          <button className="icon-text-button backup-button" type="button" onClick={() => backupInputRef.current?.click()} title="Replace this browser's register with a backup JSON file"><Upload size={16} />Restore data</button>
           <button className="icon-text-button backup-button" type="button" onClick={downloadRegister} title="Download all current plant register data"><Download size={16} />Backup data</button>
           <button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button>
         </div>

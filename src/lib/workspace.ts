@@ -2,6 +2,8 @@ import type { Plant, WorkbookData, WorkspaceFilters } from '../models'
 
 const storageKey = 'uk-grid-stability-workspace-v2'
 
+const requiredPlantFields = ['assetId', 'name', 'nodeId', 'nodeName', 'region', 'technology'] as const
+
 interface WorkspaceSnapshot {
   workbook: WorkbookData
   savedAt: string
@@ -27,6 +29,24 @@ export function saveWorkspace(workbook: WorkbookData) {
   const savedAt = new Date().toISOString()
   localStorage.setItem(storageKey, JSON.stringify({ workbook, savedAt } satisfies WorkspaceSnapshot))
   return savedAt
+}
+
+export function parsePlantBackup(value: unknown): Plant[] {
+  const plants = Array.isArray(value) ? value : undefined
+  if (!plants?.length) throw new Error('Choose a non-empty plant-register backup JSON file.')
+
+  const assetIds = new Set<string>()
+  plants.forEach((plant, index) => {
+    if (!plant || typeof plant !== 'object') throw new Error(`Record ${index + 1} is not a plant record.`)
+    const candidate = plant as Record<string, unknown>
+    if (requiredPlantFields.some((field) => typeof candidate[field] !== 'string' || !candidate[field])) throw new Error(`Record ${index + 1} is missing a required plant field.`)
+    if (typeof candidate.netMw !== 'number' || !Number.isFinite(candidate.netMw)) throw new Error(`Record ${index + 1} has an invalid net MW value.`)
+    if (typeof candidate.latitude !== 'number' || typeof candidate.longitude !== 'number' || typeof candidate.hasCoordinates !== 'boolean') throw new Error(`Record ${index + 1} has invalid location data.`)
+    if (assetIds.has(candidate.assetId as string)) throw new Error(`Record ${index + 1} duplicates asset ID ${candidate.assetId}.`)
+    assetIds.add(candidate.assetId as string)
+  })
+
+  return plants as Plant[]
 }
 
 export function filterPlants(plants: Plant[], filters: WorkspaceFilters) {

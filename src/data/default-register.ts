@@ -22,7 +22,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 381.2,
       "latitude": 54.0289,
       "longitude": -2.9161,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2028,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-002",
@@ -44,7 +47,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 391.1,
       "latitude": 54.635,
       "longitude": -1.182,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2028,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-003",
@@ -66,7 +72,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 405.9,
       "latitude": 54.0289,
       "longitude": -2.9161,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2030,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-004",
@@ -88,7 +97,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 392.7,
       "latitude": 55.968,
       "longitude": -2.4091,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2030,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-005",
@@ -110,7 +122,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 395.3,
       "latitude": 52.213,
       "longitude": 1.621,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2055,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-006",
@@ -123,7 +138,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 2595,
       "retirementDate": "2031-03-31",
       "retirementClass": "Possible",
-      "confidenceScore": 100,
+      "confidenceScore": 60,
       "evidenceSource": "LCD CfD signed 5 Nov 2025 — 4 biomass units contracted Apr 2027–Mar 2031 (Drax RNS)",
       "notes": "",
       "status": "Active",
@@ -132,7 +147,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 856.4,
       "latitude": 53.744,
       "longitude": -0.993,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2036,
+      "modelledRetirementReason": "Drax has a low-carbon dispatchable CfD covering April 2027 to March 2031"
     },
     {
       "assetId": "AST-007",
@@ -144,7 +162,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 850,
       "retirementClass": "Unclear",
-      "confidenceScore": 55,
+      "confidenceScore": 65,
       "evidenceSource": "Analyst proxy (MW-scaled) — overwrite with evidenced values",
       "notes": "",
       "status": "Active",
@@ -153,7 +171,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 280.5,
       "latitude": 51.568,
       "longitude": -2.938,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2045,
+      "modelledRetirementReason": "34-year operating life - commisioned 2001"
     },
     {
       "assetId": "AST-008",
@@ -165,7 +186,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 1440,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 55,
       "evidenceSource": "Analyst proxy (MW-scaled) — overwrite with evidenced values",
       "notes": "",
       "status": "Active",
@@ -174,7 +195,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 475.2,
       "latitude": 51.624,
       "longitude": -1.268,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2032,
+      "modelledRetirementReason": "Commissioned 1997 ~35 years of operation."
     },
     {
       "assetId": "AST-009",
@@ -186,7 +210,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 1850,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 65,
       "evidenceSource": "Analyst proxy (MW-scaled) — overwrite with evidenced values",
       "notes": "",
       "status": "Active",
@@ -195,7 +219,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 610.5,
       "latitude": 53.163,
       "longitude": -0.777,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2045,
+      "modelledRetirementReason": "Design-life proxy (~35 years)"
     },
     {
       "assetId": "AST-010",
@@ -207,7 +234,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 2181,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 65,
       "evidenceSource": "Analyst proxy (MW-scaled) — overwrite with evidenced values",
       "notes": "",
       "status": "Active",
@@ -216,7 +243,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 719.7,
       "latitude": 51.696,
       "longitude": -4.94,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2047,
+      "modelledRetirementReason": "Design-life proxy (35 year operating life)"
     },
     {
       "assetId": "AST-011",
@@ -226,9 +256,9 @@ export const defaultRegister: WorkbookData = {
       "region": "Yorkshire & Humber",
       "country": "Great Britain",
       "technology": "CCGT",
-      "netMw": 735,
+      "netMw": 732,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 50,
       "evidenceSource": "Analyst proxy (MW-scaled) — overwrite with evidenced values",
       "notes": "",
       "status": "Active",
@@ -237,7 +267,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 242.6,
       "latitude": 53.588,
       "longitude": -0.689,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2031,
+      "modelledRetirementReason": "strategic generation hub with continuing site investment"
     },
     {
       "assetId": "AST-012",
@@ -250,7 +283,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 240,
       "retirementDate": "2020-12-31",
       "retirementClass": "Likely",
-      "confidenceScore": 75,
+      "confidenceScore": 100,
       "evidenceSource": "Analyst proxy (MW-scaled) — overwrite with evidenced values",
       "notes": "",
       "status": "Active",
@@ -259,7 +292,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 79.2,
       "latitude": 53.588,
       "longitude": -0.689,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2020,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-013",
@@ -281,7 +317,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 698,
       "latitude": 52.877,
       "longitude": -1.275,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Confirmed",
+      "modelledRetirementYear": 2024,
+      "modelledRetirementReason": "Existing register assumption"
     },
     {
       "assetId": "AST-014",
@@ -294,7 +333,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 420,
       "retirementDate": "2031-03-31",
       "retirementClass": "Likely",
-      "confidenceScore": 95,
+      "confidenceScore": 60,
       "evidenceSource": "LCD CfD signed 9 Jul 2026 — subsidy Apr 2027–Mar 2031 (DESNZ / gov.uk)",
       "notes": "",
       "status": "Active",
@@ -303,7 +342,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 138.6,
       "latitude": 55.129,
       "longitude": -1.508,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2036,
+      "modelledRetirementReason": "aligns with biomass support ending; no evidence of plant retirement"
     },
     {
       "assetId": "AST-015",
@@ -324,7 +366,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 98.7,
       "latitude": 54.635,
       "longitude": -1.15,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2045,
+      "modelledRetirementReason": "RO-backed to ~2042; retirement date unclear"
     },
     {
       "assetId": "AST-016",
@@ -337,7 +382,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 1728,
       "retirementDate": "2050-12-31",
       "retirementClass": "Unlikely / Not possible",
-      "confidenceScore": 90,
+      "confidenceScore": 85,
       "evidenceSource": "£1bn ENGIE/CDPQ replant — ≥25 yr life extension, first units re-commissioning 2028/29",
       "notes": "",
       "status": "Active",
@@ -346,7 +391,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 570.2,
       "latitude": 53.184,
       "longitude": -4.172,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2055,
+      "modelledRetirementReason": "Long-life hydro with active replanting programme."
     },
     {
       "assetId": "AST-017",
@@ -359,7 +407,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 360,
       "retirementDate": "2051-07-31",
       "retirementClass": "Unlikely / Not possible",
-      "confidenceScore": 90,
+      "confidenceScore": 85,
       "evidenceSource": "9-yr replant completing Jul 2026 — ≥25 yr life extension",
       "notes": "",
       "status": "Active",
@@ -368,7 +416,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 118.8,
       "latitude": 52.928,
       "longitude": -3.936,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2051,
+      "modelledRetirementReason": "Refurbished pumped storage, +25-year life assumption."
     },
     {
       "assetId": "AST-018",
@@ -381,7 +432,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 480,
       "retirementDate": "2050-12-31",
       "retirementClass": "Unlikely / Not possible",
-      "confidenceScore": 85,
+      "confidenceScore": 80,
       "evidenceSource": "£80m Drax refurb (units 3 & 4); capacity uprated 440 → 480 MW",
       "notes": "",
       "status": "Active",
@@ -390,7 +441,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 158.4,
       "latitude": 56.391,
       "longitude": -5.112,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2050,
+      "modelledRetirementReason": "Drax/ANDRITZ confirm £80m upgrade to raise capacity to 480 MW and extend lifecycle."
     },
     {
       "assetId": "AST-019",
@@ -412,7 +466,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 99,
       "latitude": 57.136,
       "longitude": -4.675,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2045,
+      "modelledRetirementReason": "Old pumped storage asset, operational but no clear replanting date found."
     },
     {
       "assetId": "AST-020",
@@ -424,7 +481,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 727,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 50,
       "evidenceSource": "Design-life proxy (comm. 1994 + 30 yrs); no CM exit signalled",
       "notes": "",
       "status": "Active",
@@ -433,7 +490,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 239.9,
       "latitude": 52.21,
       "longitude": -0.283,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2030,
+      "modelledRetirementReason": "35-year proxy from 1995."
     },
     {
       "assetId": "AST-021",
@@ -445,7 +505,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 735,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 50,
       "evidenceSource": "Design-life proxy (comm. 1995 + 30 yrs)",
       "notes": "",
       "status": "Active",
@@ -454,7 +514,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 242.6,
       "latitude": 51.447,
       "longitude": 0.724,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2030,
+      "modelledRetirementReason": "35-year proxy from 1995."
     },
     {
       "assetId": "AST-022",
@@ -475,7 +538,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 455.4,
       "latitude": 53.217,
       "longitude": -3.056,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2030,
+      "modelledRetirementReason": "Replacement strategy points to existing unabated plant risk around 2030."
     },
     {
       "assetId": "AST-023",
@@ -487,7 +553,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT (H-class)",
       "netMw": 893,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 60,
       "evidenceSource": "Modern H-class; design-life proxy (comm. 2023 + 30 yrs)",
       "notes": "",
       "status": "Active",
@@ -496,7 +562,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 294.7,
       "latitude": 53.588,
       "longitude": -0.689,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2058,
+      "modelledRetirementReason": "35-year proxy from 2023; very new efficient CCGT."
     },
     {
       "assetId": "AST-024",
@@ -508,7 +577,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 819,
       "retirementClass": "Unclear",
-      "confidenceScore": 25,
+      "confidenceScore": 45,
       "evidenceSource": "Design-life proxy (comm. 1999 + 30 yrs)",
       "notes": "",
       "status": "Active",
@@ -517,7 +586,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 270.3,
       "latitude": 52.769,
       "longitude": 0.185,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2034,
+      "modelledRetirementReason": "35-year proxy, but mothballing history lowers confidence."
     },
     {
       "assetId": "AST-025",
@@ -529,7 +601,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT CHP",
       "netMw": 1200,
       "retirementClass": "Unclear",
-      "confidenceScore": 30,
+      "confidenceScore": 55,
       "evidenceSource": "Design-life proxy (comm. 2000 + 30 yrs); supplies Saltend Chemicals Park",
       "notes": "",
       "status": "Active",
@@ -538,7 +610,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 396,
       "latitude": 53.734,
       "longitude": -0.204,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2040,
+      "modelledRetirementReason": "CHP/industrial role and hydrogen pathway support life extension beyond simple 2035 proxy."
     },
     {
       "assetId": "AST-026",
@@ -550,7 +625,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 805,
       "retirementClass": "Possible",
-      "confidenceScore": 55,
+      "confidenceScore": 50,
       "evidenceSource": "VPI exploring 900 MW CCGT+CCS replacement online by 2030",
       "notes": "",
       "status": "Active",
@@ -559,7 +634,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 265.7,
       "latitude": 51.433,
       "longitude": 0.54,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2035,
+      "modelledRetirementReason": "35-year proxy from 2000/2001."
     },
     {
       "assetId": "AST-027",
@@ -581,7 +659,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 409.2,
       "latitude": 53.631,
       "longitude": -0.195,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2040,
+      "modelledRetirementReason": "CCS plans support operation beyond 2030"
     },
     {
       "assetId": "AST-028",
@@ -593,7 +674,7 @@ export const defaultRegister: WorkbookData = {
       "technology": "CCGT",
       "netMw": 1270,
       "retirementClass": "Unclear",
-      "confidenceScore": 30,
+      "confidenceScore": 50,
       "evidenceSource": "Design-life proxy (comm. 2013 + 30 yrs); TotalEnergies owned",
       "notes": "",
       "status": "Active",
@@ -602,7 +683,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 419.1,
       "latitude": 53.274,
       "longitude": -0.793,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2038,
+      "modelledRetirementReason": "Mid-2000s CCGT with no announced replacement or closure programme."
     },
     {
       "assetId": "AST-029",
@@ -615,7 +699,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 1180,
       "retirementDate": "2040-12-31",
       "retirementClass": "Likely",
-      "confidenceScore": 75,
+      "confidenceScore": 55,
       "evidenceSource": "SSE states existing station runs concurrently with Peterhead 2 CCS until 2040",
       "notes": "",
       "status": "Active",
@@ -624,7 +708,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 389.4,
       "latitude": 57.486,
       "longitude": -1.786,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2045,
+      "modelledRetirementReason": "Planned CCS successor at the site suggests continued operation into the 2040s"
     },
     {
       "assetId": "AST-030",
@@ -646,7 +733,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 300.3,
       "latitude": 53.588,
       "longitude": -0.689,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2055,
+      "modelledRetirementReason": "New-build CCS plant with expected multi-decade operational life."
     },
     {
       "assetId": "AST-031",
@@ -668,7 +758,10 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 297,
       "latitude": 57.486,
       "longitude": -1.786,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2055,
+      "modelledRetirementReason": "New-build CCS plant with no identified closure driver."
     },
     {
       "assetId": "AST-032",
@@ -681,7 +774,7 @@ export const defaultRegister: WorkbookData = {
       "netMw": 1500,
       "retirementDate": "2050-12-31",
       "retirementClass": "Unlikely / Not possible",
-      "confidenceScore": 50,
+      "confidenceScore": 65,
       "evidenceSource": "RWE DCO submitted for 1.5 GW post-combustion CCS retrofit — extends life to 2050+",
       "notes": "",
       "status": "Active",
@@ -690,9 +783,12 @@ export const defaultRegister: WorkbookData = {
       "reactiveProxy": 495,
       "latitude": 53.163,
       "longitude": -0.777,
-      "hasCoordinates": true
+      "hasCoordinates": true,
+      "retirementBasis": "Modelled",
+      "modelledRetirementYear": 2050,
+      "modelledRetirementReason": "CCS retrofit is specifically intended to keep Staythorpe operating as a decarbonised plant well beyond its original gas-only life."
     }
   ],
   "riskNodes": [],
-  "importedFileName": "Built-in retirement register"
+  "importedFileName": "plant-register-2026-07-16.json"
 }

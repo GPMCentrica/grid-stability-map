@@ -19,7 +19,7 @@ The application now works as a local retirement-register workspace. Import a wor
 - **Timeline**: view annual and cumulative retirement capacity for the records matching the current filters.
 - **Data quality**: resolve missing retirement dates or coordinates, low-confidence records, duplicate names, and inconsistent node labels.
 
-Edits are stored in this browser using local storage and remain after refresh. They are local to this browser profile and device: they are not written back to the source workbook or shared with other users.
+Edits are stored in this browser using local storage and remain after refresh. Use the header's register selector to switch between internal saves; the last selected register opens automatically. **Save copy** creates a named internal register from the current data, and subsequent edits are saved to that selected register. These saves are local to this browser profile and device: they are not written back to the source workbook or shared with other users.
 
 ## Built-in register and locations
 

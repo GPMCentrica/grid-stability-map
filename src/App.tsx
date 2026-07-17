@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, Database, Download, Map, Moon, Network, Sun, TableProperties, TimerReset, Upload } from 'lucide-react'
+import { Check, Database, Download, Map, Moon, Network, Save, Sun, TableProperties, TimerReset, Upload, X } from 'lucide-react'
 import { DashboardPanel } from './components/DashboardPanel'
 import { DataQualityView } from './components/DataQualityView'
 import { MapView } from './components/MapView'
@@ -8,7 +8,7 @@ import { RegisterView } from './components/RegisterView'
 import { TimelineView } from './components/TimelineView'
 import { WorkspaceFilters } from './components/WorkspaceFilters'
 import { defaultRegister } from './data/default-register'
-import { filterPlants, loadWorkspaceSnapshot, parsePlantBackup, saveWorkspace } from './lib/workspace'
+import { filterPlants, loadWorkspaceStore, parsePlantBackup, saveWorkspaceStore } from './lib/workspace'
 import type { HorizonYear, NeedLayer, NetworkLayerOptions, PlaceResult, Plant, WorkbookData } from './models'
 import { emptyWorkspaceFilters, type WorkspaceFilters as FilterState } from './models'
 
@@ -19,9 +19,15 @@ type WorkspaceView = 'map' | 'register' | 'timeline' | 'quality'
 const createDefaultWorkspace = (): WorkbookData => structuredClone(defaultRegister)
 
 export default function App() {
-  const [workspaceSnapshot] = useState(() => loadWorkspaceSnapshot())
-  const [workbook, setWorkbook] = useState<WorkbookData>(() => workspaceSnapshot?.workbook ?? createDefaultWorkspace())
-  const [savedAt, setSavedAt] = useState(workspaceSnapshot?.savedAt ?? '')
+  const [initialWorkspace] = useState(() => loadWorkspaceStore() ?? ({
+    activeRegisterId: 'current-register',
+    registers: [{ id: 'current-register', name: 'Current register', workbook: createDefaultWorkspace(), savedAt: '' }],
+  }))
+  const initialRegister = initialWorkspace.registers.find((register) => register.id === initialWorkspace.activeRegisterId) ?? initialWorkspace.registers[0]
+  const [workbook, setWorkbook] = useState<WorkbookData>(initialRegister.workbook)
+  const [savedRegisters, setSavedRegisters] = useState(initialWorkspace.registers)
+  const [activeRegisterId, setActiveRegisterId] = useState(initialRegister.id)
+  const [savedAt, setSavedAt] = useState(initialRegister.savedAt)
   const [year, setYear] = useState<HorizonYear>(2030)
   const [needLayer, setNeedLayer] = useState<NeedLayer>('none')
   const [networkLayer, setNetworkLayer] = useState(false)
@@ -32,6 +38,8 @@ export default function App() {
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult>()
   const [view, setView] = useState<WorkspaceView>('map')
   const [theme, setTheme] = useState<Theme>(() => localStorage.getItem('grid-stability-theme') === 'dark' ? 'dark' : 'light')
+  const [saveCopyOpen, setSaveCopyOpen] = useState(false)
+  const [newRegisterName, setNewRegisterName] = useState('')
   const backupInputRef = useRef<HTMLInputElement>(null)
   const deferredQuery = useDeferredValue(filters.query)
 
@@ -40,8 +48,12 @@ export default function App() {
   }, [theme])
 
   useEffect(() => {
-    setSavedAt(saveWorkspace(workbook))
-  }, [workbook])
+    const nextSavedAt = new Date().toISOString()
+    const registers = savedRegisters.map((register) => register.id === activeRegisterId ? { ...register, workbook, savedAt: nextSavedAt } : register)
+    saveWorkspaceStore({ activeRegisterId, registers })
+    setSavedRegisters(registers)
+    setSavedAt(nextSavedAt)
+  }, [workbook, activeRegisterId])
 
   const activeFilters = useMemo(() => ({ ...filters, query: deferredQuery }), [deferredQuery, filters])
   const filteredPlants = useMemo(() => filterPlants(workbook.plants, activeFilters), [activeFilters, workbook.plants])
@@ -78,7 +90,38 @@ export default function App() {
       window.alert(error instanceof Error ? `Backup was not restored: ${error.message}` : 'Backup was not restored.')
     }
   }
-  const savedLabel = savedAt ? `Saved ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(savedAt))}` : 'Saving locally'
+  const openRegisterSave = () => {
+    setNewRegisterName(`Register ${new Date().toLocaleDateString('en-GB')}`)
+    setSaveCopyOpen(true)
+  }
+  const createRegisterSave = () => {
+    const name = newRegisterName.trim()
+    if (!name) return
+    if (savedRegisters.some((register) => register.name.toLowerCase() === name.toLowerCase())) {
+      window.alert('Choose a different name. An internal register save already uses this name.')
+      return
+    }
+    const id = crypto.randomUUID()
+    const savedAt = new Date().toISOString()
+    const registers = [...savedRegisters, { id, name, workbook: structuredClone(workbook), savedAt }]
+    saveWorkspaceStore({ activeRegisterId: id, registers })
+    setSavedRegisters(registers)
+    setActiveRegisterId(id)
+    setSavedAt(savedAt)
+    setSaveCopyOpen(false)
+  }
+  const selectRegister = (registerId: string) => {
+    const register = savedRegisters.find((candidate) => candidate.id === registerId)
+    if (!register || register.id === activeRegisterId) return
+    setWorkbook(structuredClone(register.workbook))
+    setActiveRegisterId(register.id)
+    setSavedAt(register.savedAt)
+    setSelectedPlant(undefined)
+    setEditingPlant(undefined)
+    setSelectedPlace(undefined)
+  }
+  const activeRegister = savedRegisters.find((register) => register.id === activeRegisterId) ?? initialRegister
+  const savedLabel = savedAt ? `${activeRegister.name} saved ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(savedAt))}` : `${activeRegister.name} saving locally`
   const networkLegend = [networkOptions.transmission && '220+ kV transmission', networkOptions.substations && 'substations', networkOptions.lowerVoltage && '110/132 kV lines'].filter(Boolean).join(' · ') || 'No network categories selected'
 
   const tabs: { id: WorkspaceView, label: string, icon: typeof Map }[] = [
@@ -91,12 +134,20 @@ export default function App() {
         <div className="brand-lockup"><span className="brand-mark">UK</span><div><p>Electricity system analysis</p><h1>Grid Stability Map</h1></div></div>
         <div className="import-actions">
           <span className="save-indicator" role="status"><Check size={14} />{savedLabel}</span>
+          <label className="register-picker" title="Choose the internal register to use"><Database size={15} /><select value={activeRegisterId} onChange={(event) => selectRegister(event.target.value)} aria-label="Active internal register">{savedRegisters.map((register) => <option key={register.id} value={register.id}>{register.name}</option>)}</select></label>
+          <button className="icon-text-button backup-button" type="button" onClick={openRegisterSave} title="Save the current register as a named internal copy"><Save size={16} />Save copy</button>
           <input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void restoreRegister(file) }} />
           <button className="icon-text-button backup-button" type="button" onClick={() => backupInputRef.current?.click()} title="Replace this browser's register with a backup JSON file"><Upload size={16} />Restore data</button>
           <button className="icon-text-button backup-button" type="button" onClick={downloadRegister} title="Download all current plant register data"><Download size={16} />Backup data</button>
           <button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button>
         </div>
       </header>
+
+      {saveCopyOpen && <div className="modal-backdrop"><form className="save-register-dialog" onSubmit={(event) => { event.preventDefault(); createRegisterSave() }}>
+        <header><div><p>Internal register</p><h2>Save register copy</h2></div><button className="close-button" type="button" onClick={() => setSaveCopyOpen(false)} aria-label="Close save register dialog"><X size={16} /></button></header>
+        <label>Register name<input value={newRegisterName} onChange={(event) => setNewRegisterName(event.target.value)} autoFocus /></label>
+        <footer><button className="secondary-action" type="button" onClick={() => setSaveCopyOpen(false)}>Cancel</button><button className="primary-action" type="submit"><Save size={16} />Save copy</button></footer>
+      </form></div>}
 
       <nav className="workspace-tabs" aria-label="Workspace areas">{tabs.map((tab) => { const Icon = tab.icon; return <button key={tab.id} type="button" className={view === tab.id ? 'active' : ''} onClick={() => setView(tab.id)}><Icon size={16} />{tab.label}</button> })}</nav>
 

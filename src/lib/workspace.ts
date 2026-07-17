@@ -1,6 +1,7 @@
 import type { Plant, WorkbookData, WorkspaceFilters } from '../models'
 
-const storageKey = 'uk-grid-stability-workspace-v2'
+const storageKey = 'uk-grid-stability-workspace-v3'
+const legacyStorageKey = 'uk-grid-stability-workspace-v2'
 
 const requiredPlantFields = ['assetId', 'name', 'nodeId', 'nodeName', 'region', 'technology'] as const
 
@@ -9,26 +10,41 @@ interface WorkspaceSnapshot {
   savedAt: string
 }
 
-export function loadWorkspaceSnapshot(): WorkspaceSnapshot | undefined {
+export interface SavedRegister extends WorkspaceSnapshot {
+  id: string
+  name: string
+}
+
+export interface WorkspaceStore {
+  activeRegisterId: string
+  registers: SavedRegister[]
+}
+
+function parseWorkspaceSnapshot(value: unknown): WorkspaceSnapshot | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const candidate = value as Partial<WorkspaceSnapshot>
+  return candidate.workbook && Array.isArray(candidate.workbook.plants) && typeof candidate.savedAt === 'string' ? candidate as WorkspaceSnapshot : undefined
+}
+
+export function loadWorkspaceStore(): WorkspaceStore | undefined {
   try {
-    const stored = localStorage.getItem(storageKey)
+    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem(legacyStorageKey)
     if (!stored) return undefined
-    const parsed = JSON.parse(stored) as WorkbookData | WorkspaceSnapshot
-    if ('workbook' in parsed) return parsed
-    return { workbook: parsed, savedAt: '' }
+    const parsed = JSON.parse(stored) as WorkspaceStore | WorkbookData | WorkspaceSnapshot
+    if ('registers' in parsed && Array.isArray(parsed.registers) && typeof parsed.activeRegisterId === 'string') {
+      const registers = parsed.registers.filter((register): register is SavedRegister => Boolean(register) && typeof register.id === 'string' && typeof register.name === 'string' && Boolean(parseWorkspaceSnapshot(register)))
+      if (registers.some((register) => register.id === parsed.activeRegisterId)) return { activeRegisterId: parsed.activeRegisterId, registers }
+      return registers.length ? { activeRegisterId: registers[0].id, registers } : undefined
+    }
+    const snapshot = 'workbook' in parsed ? parseWorkspaceSnapshot(parsed) : { workbook: parsed as WorkbookData, savedAt: '' }
+    return snapshot ? { activeRegisterId: 'current-register', registers: [{ id: 'current-register', name: 'Current register', ...snapshot }] } : undefined
   } catch {
     return undefined
   }
 }
 
-export function loadWorkspace() {
-  return loadWorkspaceSnapshot()?.workbook
-}
-
-export function saveWorkspace(workbook: WorkbookData) {
-  const savedAt = new Date().toISOString()
-  localStorage.setItem(storageKey, JSON.stringify({ workbook, savedAt } satisfies WorkspaceSnapshot))
-  return savedAt
+export function saveWorkspaceStore(store: WorkspaceStore) {
+  localStorage.setItem(storageKey, JSON.stringify(store))
 }
 
 export function parsePlantBackup(value: unknown): Plant[] {

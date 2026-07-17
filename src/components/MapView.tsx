@@ -46,6 +46,8 @@ function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, poi
     const draw = () => {
       const size = map.getSize()
       const pixelRatio = window.devicePixelRatio || 1
+      const origin = map.containerPointToLayerPoint([0, 0])
+      L.DomUtil.setPosition(canvas, origin)
       canvas.width = size.x * pixelRatio
       canvas.height = size.y * pixelRatio
       canvas.style.width = `${size.x}px`
@@ -57,7 +59,7 @@ function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, poi
       context.globalCompositeOperation = 'lighter'
 
       points.forEach((point) => {
-        const centre = map.latLngToContainerPoint([point.latitude, point.longitude])
+        const centre = map.latLngToLayerPoint([point.latitude, point.longitude]).subtract(origin)
         const metresPerPixel = 40075016.686 * Math.cos(point.latitude * Math.PI / 180) / (2 ** (map.getZoom() + 8))
         const radius = Math.max(18, profile.radiusKm * 1000 / metresPerPixel)
         const alpha = 0.28 + point.intensity * 0.5

@@ -1,7 +1,7 @@
 import { divIcon } from 'leaflet'
 import L from 'leaflet'
-import { Fragment, useEffect, useState } from 'react'
-import { Circle, CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { useEffect, useState } from 'react'
+import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet.vectorgrid'
 import { getLocationNeeds, needColour, needLabel } from '../lib/need'
 import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, RetiredAssetMode } from '../models'
@@ -17,6 +17,71 @@ interface MapViewProps {
   focusedPlant?: Plant
   focusedPlace?: Coordinates
   onPlantSelect: (plant?: Plant) => void
+}
+
+interface HeatPoint {
+  latitude: number
+  longitude: number
+  intensity: number
+}
+
+const heatProfiles = {
+  scl: { radiusKm: 30, colour: [222, 69, 42] },
+  voltage: { radiusKm: 60, colour: [20, 133, 196] },
+  inertia: { radiusKm: 100, colour: [20, 137, 117] },
+} as const
+
+function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, points: HeatPoint[] }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!points.length) return
+    const profile = heatProfiles[layer]
+    const canvas = document.createElement('canvas')
+    canvas.className = 'need-heatmap'
+    canvas.style.pointerEvents = 'none'
+    const pane = map.getPanes().overlayPane
+    pane.insertBefore(canvas, pane.firstChild)
+
+    const draw = () => {
+      const size = map.getSize()
+      const pixelRatio = window.devicePixelRatio || 1
+      canvas.width = size.x * pixelRatio
+      canvas.height = size.y * pixelRatio
+      canvas.style.width = `${size.x}px`
+      canvas.style.height = `${size.y}px`
+      const context = canvas.getContext('2d')
+      if (!context) return
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+      context.clearRect(0, 0, size.x, size.y)
+      context.globalCompositeOperation = 'lighter'
+
+      points.forEach((point) => {
+        const centre = map.latLngToContainerPoint([point.latitude, point.longitude])
+        const metresPerPixel = 40075016.686 * Math.cos(point.latitude * Math.PI / 180) / (2 ** (map.getZoom() + 8))
+        const radius = Math.max(18, profile.radiusKm * 1000 / metresPerPixel)
+        const alpha = 0.28 + point.intensity * 0.5
+        const gradient = context.createRadialGradient(centre.x, centre.y, 0, centre.x, centre.y, radius)
+        gradient.addColorStop(0, `rgba(${profile.colour.join(', ')}, ${alpha})`)
+        gradient.addColorStop(0.28, `rgba(${profile.colour.join(', ')}, ${alpha * 0.68})`)
+        gradient.addColorStop(0.65, `rgba(${profile.colour.join(', ')}, ${alpha * 0.2})`)
+        gradient.addColorStop(1, `rgba(${profile.colour.join(', ')}, 0)`)
+        context.fillStyle = gradient
+        context.beginPath()
+        context.arc(centre.x, centre.y, radius, 0, Math.PI * 2)
+        context.fill()
+      })
+    }
+
+    draw()
+    map.on('move zoom resize viewreset', draw)
+    return () => {
+      map.off('move zoom resize viewreset', draw)
+      canvas.remove()
+    }
+  }, [layer, map, points])
+
+  return null
 }
 
 function PlantFocus({ plant, place }: { plant?: Plant, place?: Coordinates }) {
@@ -132,12 +197,13 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
   const locationNeeds = activeNeedLayer ? getLocationNeeds(plants, year, activeNeedLayer) : []
   const layerLabel = activeNeedLayer === 'scl' ? 'Short-circuit level' : activeNeedLayer === 'voltage' ? 'Voltage support' : 'Inertia'
   const serviceUnit = activeNeedLayer === 'inertia' ? 'MWs proxy' : activeNeedLayer === 'scl' ? 'SCL proxy' : 'MVAr proxy'
-  const localityVisual = activeNeedLayer === 'scl'
-    ? { bandKm: 30, markerWeight: 22, ringOpacity: 0.58, fillOpacity: 0.085 }
-    : activeNeedLayer === 'voltage'
-      ? { bandKm: 60, markerWeight: 17, ringOpacity: 0.4, fillOpacity: 0.055 }
-      : { bandKm: 100, markerWeight: 12, ringOpacity: 0.24, fillOpacity: 0.03 }
   const largestServiceLoss = Math.max(1, ...locationNeeds.map((location) => location.retiringService))
+  const largestLocationalImportance = Math.max(0.001, ...locationNeeds.map((location) => Math.sqrt(location.need * location.retiringService / largestServiceLoss)))
+  const localityVisual = activeNeedLayer === 'scl'
+    ? { markerWeight: 22, bandKm: 30 }
+    : activeNeedLayer === 'voltage'
+      ? { markerWeight: 17, bandKm: 60 }
+      : { markerWeight: 12, bandKm: 100 }
 
   return (
     <MapContainer center={[55.4, -3.2]} zoom={5.7} minZoom={5} zoomControl={false} className="map-canvas">
@@ -149,15 +215,13 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
       <PlantFocus plant={focusedPlant} place={focusedPlace} />
       <MapClickDeselect onDeselect={() => onPlantSelect()} />
       <NetworkOverlay enabled={networkLayer} options={networkOptions} />
+      {activeNeedLayer && <NeedHeatmap layer={activeNeedLayer} points={locationNeeds.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: Math.sqrt(location.need * location.retiringService / largestServiceLoss) / largestLocationalImportance }))} />}
       {locationNeeds.map((location) => {
         const colour = needColour(location.need)
         const locationalImportance = Math.sqrt(location.need * location.retiringService / largestServiceLoss)
-        return <Fragment key={`${activeNeedLayer}-${location.nodeId}`}>
-          <Circle center={[location.latitude, location.longitude]} radius={localityVisual.bandKm * 1000} interactive={false} pathOptions={{ color: colour, weight: 1, opacity: localityVisual.ringOpacity, fillColor: colour, fillOpacity: localityVisual.fillOpacity }} />
-          <CircleMarker center={[location.latitude, location.longitude]} radius={6 + localityVisual.markerWeight * locationalImportance} pathOptions={{ color: colour, weight: 1.5, fillColor: colour, fillOpacity: 0.16 + location.need * 0.28 }}>
-            <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Relative locational importance</dt><dd>{Math.round(locationalImportance * 100)}%</dd></div><div><dt>Estimated provision lost</dt><dd>{new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(location.retiringService)} {serviceUnit}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Visual locality band</dt><dd>~{localityVisual.bandKm} km</dd></div><div><dt>Basis</dt><dd>Technology and locality assumptions</dd></div></dl></div></Popup>
-          </CircleMarker>
-        </Fragment>
+        return <CircleMarker key={`${activeNeedLayer}-${location.nodeId}`} center={[location.latitude, location.longitude]} radius={6 + localityVisual.markerWeight * locationalImportance} pathOptions={{ color: colour, weight: 1.5, fillColor: colour, fillOpacity: 0.16 + location.need * 0.28 }}>
+          <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Relative locational importance</dt><dd>{Math.round(locationalImportance * 100)}%</dd></div><div><dt>Estimated provision lost</dt><dd>{new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(location.retiringService)} {serviceUnit}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Heat spread assumption</dt><dd>~{localityVisual.bandKm} km</dd></div><div><dt>Basis</dt><dd>Technology and locality assumptions</dd></div></dl></div></Popup>
+        </CircleMarker>
       })}
       {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} /></Popup></Marker>)}
     </MapContainer>

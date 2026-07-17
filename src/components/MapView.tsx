@@ -12,6 +12,7 @@ interface MapViewProps {
   year: HorizonYear
   retiredMode: RetiredAssetMode
   needLayer: NeedLayer
+  heatOpacity: number
   networkLayer: boolean
   networkOptions: NetworkLayerOptions
   focusedPlant?: Plant
@@ -31,7 +32,7 @@ const heatProfiles = {
   inertia: { radiusKm: 100, colour: [20, 137, 117] },
 } as const
 
-function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, points: HeatPoint[] }) {
+function NeedHeatmap({ layer, points, opacity }: { layer: Exclude<NeedLayer, 'none'>, points: HeatPoint[], opacity: number }) {
   const map = useMap()
 
   useEffect(() => {
@@ -62,7 +63,7 @@ function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, poi
         const centre = map.latLngToLayerPoint([point.latitude, point.longitude]).subtract(origin)
         const metresPerPixel = 40075016.686 * Math.cos(point.latitude * Math.PI / 180) / (2 ** (map.getZoom() + 8))
         const radius = Math.max(18, profile.radiusKm * 1000 / metresPerPixel)
-        const alpha = 0.1 + point.intensity * 0.28
+        const alpha = (0.1 + point.intensity * 0.28) * opacity
         const gradient = context.createRadialGradient(centre.x, centre.y, 0, centre.x, centre.y, radius)
         gradient.addColorStop(0, `rgba(${profile.colour.join(', ')}, ${alpha})`)
         gradient.addColorStop(0.28, `rgba(${profile.colour.join(', ')}, ${alpha * 0.55})`)
@@ -81,7 +82,7 @@ function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, poi
       map.off('moveend zoomend resize viewreset', draw)
       canvas.remove()
     }
-  }, [layer, map, points])
+  }, [layer, map, opacity, points])
 
   return null
 }
@@ -193,7 +194,7 @@ function PlantPopup({ plant }: { plant: Plant }) {
   )
 }
 
-export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, networkLayer, networkOptions, focusedPlant, focusedPlace, onPlantSelect }: MapViewProps) {
+export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, heatOpacity, networkLayer, networkOptions, focusedPlant, focusedPlace, onPlantSelect }: MapViewProps) {
   const visiblePlants = plants
   const activeNeedLayer = needLayer === 'none' ? undefined : needLayer
   const locationNeeds = activeNeedLayer ? getLocationNeeds(plants, year, activeNeedLayer) : []
@@ -217,7 +218,7 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, ne
       <PlantFocus plant={focusedPlant} place={focusedPlace} />
       <MapClickDeselect onDeselect={() => onPlantSelect()} />
       <NetworkOverlay enabled={networkLayer} options={networkOptions} />
-      {activeNeedLayer && <NeedHeatmap layer={activeNeedLayer} points={locationNeeds.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: Math.sqrt(location.need * location.retiringService / largestServiceLoss) / largestLocationalImportance }))} />}
+      {activeNeedLayer && <NeedHeatmap layer={activeNeedLayer} opacity={heatOpacity} points={locationNeeds.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: Math.sqrt(location.need * location.retiringService / largestServiceLoss) / largestLocationalImportance }))} />}
       {locationNeeds.map((location) => {
         const colour = needColour(location.need)
         const locationalImportance = Math.sqrt(location.need * location.retiringService / largestServiceLoss)

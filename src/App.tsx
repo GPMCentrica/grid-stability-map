@@ -30,6 +30,7 @@ export default function App() {
   const [savedAt, setSavedAt] = useState(initialRegister.savedAt)
   const [year, setYear] = useState<HorizonYear>(2030)
   const [needLayer, setNeedLayer] = useState<NeedLayer>('none')
+  const [heatOpacity, setHeatOpacity] = useState(100)
   const [networkLayer, setNetworkLayer] = useState(false)
   const [networkOptions, setNetworkOptions] = useState<NetworkLayerOptions>({ transmission: true, substations: false, lowerVoltage: false, future: false })
   const [filters, setFilters] = useState<FilterState>(emptyWorkspaceFilters)
@@ -194,12 +195,13 @@ export default function App() {
           <span>Need overlay</span>
           {([{ id: 'none', label: 'Off' }, { id: 'inertia', label: 'Inertia' }, { id: 'scl', label: 'SCL' }, { id: 'voltage', label: 'Voltage' }] as const).map((layer) => <button key={layer.id} type="button" className={needLayer === layer.id ? 'active' : ''} onClick={() => setNeedLayer(layer.id)}>{layer.label}</button>)}
         </div>
+        {needLayer !== 'none' && <label className="heat-opacity-control">Heat <input type="range" min="20" max="100" step="5" value={heatOpacity} onChange={(event) => setHeatOpacity(Number(event.target.value))} aria-label="Heatmap opacity" /><output>{heatOpacity}%</output></label>}
         <button className={`network-layer-toggle ${networkLayer ? 'active' : ''}`} type="button" onClick={() => setNetworkLayer((current) => !current)} title="Show OpenStreetMap lines and substations"><Network size={15} />Network</button>
         {networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: '220+ kV' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '110/132 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <button key={option.id} type="button" className={networkOptions[option.id] ? 'active' : ''} aria-pressed={networkOptions[option.id]} onClick={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))}>{option.label}</button>)}</div>}
       </section>}
 
       {view === 'map' && <section className="map-workspace">
-        <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} networkLayer={networkLayer} networkOptions={networkOptions} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={(plant) => setSelectedPlant((current) => current?.assetId === plant?.assetId ? undefined : plant)} />
+        <MapView plants={mapPlants} year={year} retiredMode="fade" needLayer={needLayer} heatOpacity={heatOpacity / 100} networkLayer={networkLayer} networkOptions={networkOptions} focusedPlant={focusedPlant ?? selectedPlace?.registeredPlant} focusedPlace={selectedPlace} onPlantSelect={(plant) => setSelectedPlant((current) => current?.assetId === plant?.assetId ? undefined : plant)} />
         <DashboardPanel plants={filteredPlants} year={year} selectedPlant={selectedPlant} />
         <div className="map-legend" aria-label="Map legend">
           {networkLayer ? <><span className="legend-title">Network data</span><span className="network-key" />{networkLegend}{networkOptions.future && <><span className="network-key future" />Proposed / construction</>}</> : needLayer === 'none' ? <><span className="legend-title">Generation markers</span><span className="marker-key" />Size: Net MW<span className="marker-key technology" />Colour: technology<span className="marker-key lifespan" />Opacity: retirement timing</> : <><span className="legend-title">{needLayer === 'scl' ? 'SCL heat' : needLayer === 'voltage' ? 'Voltage heat' : 'Inertia heat'}</span><span className={`heat-key ${needLayer}`} />Lower<span className="heat-key-label">Relative screening intensity</span>Higher<span className="marker-key" />Source node</>}

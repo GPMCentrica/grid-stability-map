@@ -2,6 +2,10 @@
 
 An interactive React and Leaflet dashboard for locating UK generating plant retirements and viewing the stability deficits modelled in the supplied retirement register.
 
+## Shareable site
+
+The GitHub Pages workflow publishes the current `main` branch to [https://gpmcentrica.github.io/grid-stability-map/](https://gpmcentrica.github.io/grid-stability-map/) after each push. In the repository's **Settings > Pages**, set the deployment source to **GitHub Actions** once; GitHub will then make the site available to anyone who can access the repository's Pages site.
+
 ## What it does
 
 - Imports `PLANT_DATA`, `CORE_MODEL`, and `OUTPUTS` directly from an Excel workbook in the browser.

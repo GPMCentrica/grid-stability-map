@@ -76,9 +76,9 @@ function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, poi
     }
 
     draw()
-    map.on('move zoom resize viewreset', draw)
+    map.on('moveend zoomend resize viewreset', draw)
     return () => {
-      map.off('move zoom resize viewreset', draw)
+      map.off('moveend zoomend resize viewreset', draw)
       canvas.remove()
     }
   }, [layer, map, points])

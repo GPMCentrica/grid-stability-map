@@ -19,7 +19,7 @@ The application now works as a local retirement-register workspace. Import a wor
 - **Timeline**: view annual and cumulative retirement capacity for the records matching the current filters.
 - **Data quality**: resolve missing retirement dates or coordinates, low-confidence records, duplicate names, and inconsistent node labels.
 
-Edits are stored in this browser using local storage and remain after refresh. Use the header's register selector to switch between internal saves; the last selected register opens automatically. **Save copy** creates a named internal register from the current data, and subsequent edits are saved to that selected register. These saves are local to this browser profile and device: they are not written back to the source workbook or shared with other users.
+Edits are stored in this browser using local storage and remain after refresh. Use the header's register selector to switch between internal saves; the last selected register opens automatically. **Save copy** creates a named internal register from the current data, and subsequent edits are saved to that selected register. **Merge CSV** validates a plant-register CSV and creates a separate combined internal register, adding new asset IDs and updating matching ones without changing the source register. These saves are local to this browser profile and device: they are not written back to the source workbook or shared with other users.
 
 ## Built-in register and locations
 
@@ -41,7 +41,7 @@ The map includes optional **Inertia**, **SCL**, and **Voltage** need overlays. T
 - Inertia uses the stored inertia proxy, SCL uses the fault-level proxy, and Voltage uses the reactive-power proxy. If a proxy is unavailable, the app derives it from MW using the existing register factors.
 - The overlays label locations as low, moderate, or high screening need. Their purpose is to direct analytical attention, not to set operational limits or investment decisions.
 
-The built-in baseline currently contains Great Britain records only. Ireland, Northern Ireland, and Republic of Ireland records should be added to the same local register once an authoritative source and treatment of retirement assumptions have been agreed.
+The built-in baseline currently contains Great Britain records only. Use **Merge CSV** to create an internal combined register for Ireland, Northern Ireland, or Republic of Ireland data without changing that baseline. The CSV must include `asset_id`, `plant_name`, `node_id`, `node_substation`, `country`, `region`, `technology`, `net_mw`, `status`, `latitude`, and `longitude`; retirement, evidence, proxy, and quality-note columns are imported when present.
 
 The workbook itself is not bundled into the web application. Browsers cannot safely read an arbitrary local workbook without user selection, so use **Import workbook** and choose `UK Generation Retirement Register.xlsx`.
 

@@ -65,6 +65,67 @@ export function parsePlantBackup(value: unknown): Plant[] {
   return plants as Plant[]
 }
 
+function csvText(row: Record<string, unknown>, column: string, recordNumber: number, required = false) {
+  const value = String(row[column] ?? '').trim()
+  if (required && !value) throw new Error(`Record ${recordNumber} is missing ${column}.`)
+  return value
+}
+
+function csvNumber(row: Record<string, unknown>, column: string, recordNumber: number, required = false) {
+  const value = csvText(row, column, recordNumber, required)
+  if (!value) return undefined
+  const number = Number(value)
+  if (!Number.isFinite(number)) throw new Error(`Record ${recordNumber} has an invalid ${column} value.`)
+  return number
+}
+
+export async function parsePlantCsv(text: string): Promise<Plant[]> {
+  const XLSX = await import('xlsx')
+  const workbook = XLSX.read(text, { type: 'string' })
+  const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  if (!sheet) throw new Error('Choose a CSV file with a header row and at least one plant record.')
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false, defval: '' })
+  if (!rows.length) throw new Error('Choose a CSV file with at least one plant record.')
+
+  const plants = rows.map((row, index) => {
+    const recordNumber = index + 2
+    const status = csvText(row, 'status', recordNumber, true)
+    if (!['Active', 'Retiring', 'Retired', 'Archived'].includes(status)) throw new Error(`Record ${recordNumber} has an unsupported status.`)
+    const retirementBasis = csvText(row, 'retirement_basis', recordNumber)
+    if (retirementBasis && !['Confirmed', 'Modelled', 'Unconfirmed'].includes(retirementBasis)) throw new Error(`Record ${recordNumber} has an unsupported retirement_basis.`)
+
+    const latitude = csvNumber(row, 'latitude', recordNumber, true)
+    const longitude = csvNumber(row, 'longitude', recordNumber, true)
+    return {
+      assetId: csvText(row, 'asset_id', recordNumber, true),
+      name: csvText(row, 'plant_name', recordNumber, true),
+      nodeId: csvText(row, 'node_id', recordNumber, true),
+      nodeName: csvText(row, 'node_substation', recordNumber, true),
+      country: csvText(row, 'country', recordNumber, true),
+      region: csvText(row, 'region', recordNumber, true),
+      technology: csvText(row, 'technology', recordNumber, true),
+      netMw: csvNumber(row, 'net_mw', recordNumber, true)!,
+      status: status as Plant['status'],
+      latitude: latitude!,
+      longitude: longitude!,
+      hasCoordinates: true,
+      retirementDate: csvText(row, 'retirement_date', recordNumber) || undefined,
+      retirementBasis: retirementBasis as Plant['retirementBasis'],
+      retirementClass: csvText(row, 'retirement_class', recordNumber) || undefined,
+      confidenceScore: csvNumber(row, 'confidence_score', recordNumber),
+      evidenceSource: csvText(row, 'evidence_source', recordNumber) || undefined,
+      modelledRetirementYear: csvNumber(row, 'modelled_retirement_year', recordNumber),
+      modelledRetirementReason: csvText(row, 'modelled_retirement_reason', recordNumber) || undefined,
+      inertiaProxy: csvNumber(row, 'inertiaProxy', recordNumber),
+      faultLevelProxy: csvNumber(row, 'faultLevelProxy', recordNumber),
+      reactiveProxy: csvNumber(row, 'reactiveProxy', recordNumber),
+      notes: csvText(row, 'data_quality_note', recordNumber) || undefined,
+    }
+  })
+
+  return parsePlantBackup(plants)
+}
+
 export function filterPlants(plants: Plant[], filters: WorkspaceFilters) {
   const searchTerm = filters.query.trim().toLowerCase()
   return plants.filter((plant) => {

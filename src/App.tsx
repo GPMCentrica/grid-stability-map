@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, Database, Download, Map, Moon, Network, Save, Sun, TableProperties, TimerReset, Upload, X } from 'lucide-react'
+import { Check, Database, Download, FilePlus2, Map, Moon, Network, Save, Sun, TableProperties, TimerReset, Upload, X } from 'lucide-react'
 import { DashboardPanel } from './components/DashboardPanel'
 import { DataQualityView } from './components/DataQualityView'
 import { MapView } from './components/MapView'
@@ -8,7 +8,7 @@ import { RegisterView } from './components/RegisterView'
 import { TimelineView } from './components/TimelineView'
 import { WorkspaceFilters } from './components/WorkspaceFilters'
 import { defaultRegister } from './data/default-register'
-import { filterPlants, loadWorkspaceStore, parsePlantBackup, saveWorkspaceStore } from './lib/workspace'
+import { filterPlants, loadWorkspaceStore, parsePlantBackup, parsePlantCsv, saveWorkspaceStore } from './lib/workspace'
 import type { HorizonYear, NeedLayer, NetworkLayerOptions, PlaceResult, Plant, WorkbookData } from './models'
 import { emptyWorkspaceFilters, type WorkspaceFilters as FilterState } from './models'
 
@@ -41,6 +41,7 @@ export default function App() {
   const [saveCopyOpen, setSaveCopyOpen] = useState(false)
   const [newRegisterName, setNewRegisterName] = useState('')
   const backupInputRef = useRef<HTMLInputElement>(null)
+  const mergeInputRef = useRef<HTMLInputElement>(null)
   const deferredQuery = useDeferredValue(filters.query)
 
   useEffect(() => {
@@ -90,6 +91,37 @@ export default function App() {
       window.alert(error instanceof Error ? `Backup was not restored: ${error.message}` : 'Backup was not restored.')
     }
   }
+  const mergeCsvRegister = async (file?: File) => {
+    if (!file) return
+    try {
+      const importedPlants = await parsePlantCsv(await file.text())
+      const importedIds = new Set(importedPlants.map((plant) => plant.assetId))
+      const updatedRecords = workbook.plants.filter((plant) => importedIds.has(plant.assetId)).length
+      const mergedPlants = [...workbook.plants.filter((plant) => !importedIds.has(plant.assetId)), ...importedPlants]
+      const baseName = `${activeRegister.name} + Ireland`
+      let name = baseName
+      let copyNumber = 2
+      while (savedRegisters.some((register) => register.name.toLowerCase() === name.toLowerCase())) {
+        name = `${baseName} (${copyNumber})`
+        copyNumber += 1
+      }
+      const id = crypto.randomUUID()
+      const savedAt = new Date().toISOString()
+      const nextWorkbook = { ...workbook, plants: mergedPlants, importedFileName: `Merged ${file.name}` }
+      const registers = [...savedRegisters, { id, name, workbook: nextWorkbook, savedAt }]
+      saveWorkspaceStore({ activeRegisterId: id, registers })
+      setSavedRegisters(registers)
+      setActiveRegisterId(id)
+      setWorkbook(nextWorkbook)
+      setSavedAt(savedAt)
+      setSelectedPlant(undefined)
+      setEditingPlant(undefined)
+      setSelectedPlace(undefined)
+      window.alert(`${importedPlants.length} CSV records merged into ${name}${updatedRecords ? `; ${updatedRecords} existing records updated.` : '.'}`)
+    } catch (error) {
+      window.alert(error instanceof Error ? `CSV was not merged: ${error.message}` : 'CSV was not merged.')
+    }
+  }
   const openRegisterSave = () => {
     setNewRegisterName(`Register ${new Date().toLocaleDateString('en-GB')}`)
     setSaveCopyOpen(true)
@@ -136,6 +168,8 @@ export default function App() {
           <span className="save-indicator" role="status"><Check size={14} />{savedLabel}</span>
           <label className="register-picker" title="Choose the internal register to use"><Database size={15} /><select value={activeRegisterId} onChange={(event) => selectRegister(event.target.value)} aria-label="Active internal register">{savedRegisters.map((register) => <option key={register.id} value={register.id}>{register.name}</option>)}</select></label>
           <button className="icon-text-button backup-button" type="button" onClick={openRegisterSave} title="Save the current register as a named internal copy"><Save size={16} />Save copy</button>
+          <input ref={mergeInputRef} type="file" accept="text/csv,.csv" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void mergeCsvRegister(file) }} />
+          <button className="icon-text-button backup-button" type="button" onClick={() => mergeInputRef.current?.click()} title="Merge a plant-register CSV into a new internal register copy"><FilePlus2 size={16} />Merge CSV</button>
           <input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void restoreRegister(file) }} />
           <button className="icon-text-button backup-button" type="button" onClick={() => backupInputRef.current?.click()} title="Replace this browser's register with a backup JSON file"><Upload size={16} />Restore data</button>
           <button className="icon-text-button backup-button" type="button" onClick={downloadRegister} title="Download all current plant register data"><Download size={16} />Backup data</button>

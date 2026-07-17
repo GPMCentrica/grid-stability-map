@@ -56,17 +56,17 @@ function NeedHeatmap({ layer, points }: { layer: Exclude<NeedLayer, 'none'>, poi
       if (!context) return
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
       context.clearRect(0, 0, size.x, size.y)
-      context.globalCompositeOperation = 'lighter'
+      context.globalCompositeOperation = 'source-over'
 
       points.forEach((point) => {
         const centre = map.latLngToLayerPoint([point.latitude, point.longitude]).subtract(origin)
         const metresPerPixel = 40075016.686 * Math.cos(point.latitude * Math.PI / 180) / (2 ** (map.getZoom() + 8))
         const radius = Math.max(18, profile.radiusKm * 1000 / metresPerPixel)
-        const alpha = 0.28 + point.intensity * 0.5
+        const alpha = 0.08 + point.intensity * 0.22
         const gradient = context.createRadialGradient(centre.x, centre.y, 0, centre.x, centre.y, radius)
         gradient.addColorStop(0, `rgba(${profile.colour.join(', ')}, ${alpha})`)
-        gradient.addColorStop(0.28, `rgba(${profile.colour.join(', ')}, ${alpha * 0.68})`)
-        gradient.addColorStop(0.65, `rgba(${profile.colour.join(', ')}, ${alpha * 0.2})`)
+        gradient.addColorStop(0.28, `rgba(${profile.colour.join(', ')}, ${alpha * 0.55})`)
+        gradient.addColorStop(0.65, `rgba(${profile.colour.join(', ')}, ${alpha * 0.12})`)
         gradient.addColorStop(1, `rgba(${profile.colour.join(', ')}, 0)`)
         context.fillStyle = gradient
         context.beginPath()

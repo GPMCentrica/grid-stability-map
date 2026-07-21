@@ -1,7 +1,6 @@
 import type { Plant, WorkbookData, WorkspaceFilters } from '../models'
 
-const storageKey = 'uk-grid-stability-workspace-v3'
-const legacyStorageKey = 'uk-grid-stability-workspace-v2'
+const storageKey = 'uk-grid-stability-workspace-v4'
 
 const requiredPlantFields = ['assetId', 'name', 'nodeId', 'nodeName', 'region', 'technology'] as const
 
@@ -28,7 +27,7 @@ function parseWorkspaceSnapshot(value: unknown): WorkspaceSnapshot | undefined {
 
 export function loadWorkspaceStore(): WorkspaceStore | undefined {
   try {
-    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem(legacyStorageKey)
+    const stored = localStorage.getItem(storageKey)
     if (!stored) return undefined
     const parsed = JSON.parse(stored) as WorkspaceStore | WorkbookData | WorkspaceSnapshot
     if ('registers' in parsed && Array.isArray(parsed.registers) && typeof parsed.activeRegisterId === 'string') {
@@ -37,7 +36,7 @@ export function loadWorkspaceStore(): WorkspaceStore | undefined {
       return registers.length ? { activeRegisterId: registers[0].id, registers } : undefined
     }
     const snapshot = 'workbook' in parsed ? parseWorkspaceSnapshot(parsed) : { workbook: parsed as WorkbookData, savedAt: '' }
-    return snapshot ? { activeRegisterId: 'current-register', registers: [{ id: 'current-register', name: 'Current register', ...snapshot }] } : undefined
+    return snapshot ? { activeRegisterId: 'published-register', registers: [{ id: 'published-register', name: 'Shared register - 17 Jul 2026', ...snapshot }] } : undefined
   } catch {
     return undefined
   }

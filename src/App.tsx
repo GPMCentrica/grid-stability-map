@@ -20,8 +20,8 @@ const createDefaultWorkspace = (): WorkbookData => structuredClone(defaultRegist
 
 export default function App() {
   const [initialWorkspace] = useState(() => loadWorkspaceStore() ?? ({
-    activeRegisterId: 'current-register',
-    registers: [{ id: 'current-register', name: 'Current register', workbook: createDefaultWorkspace(), savedAt: '' }],
+    activeRegisterId: 'published-register',
+    registers: [{ id: 'published-register', name: 'Shared register - 17 Jul 2026', workbook: createDefaultWorkspace(), savedAt: '' }],
   }))
   const initialRegister = initialWorkspace.registers.find((register) => register.id === initialWorkspace.activeRegisterId) ?? initialWorkspace.registers[0]
   const [workbook, setWorkbook] = useState<WorkbookData>(initialRegister.workbook)
@@ -166,8 +166,8 @@ export default function App() {
       <header className="app-header">
         <div className="brand-lockup"><span className="brand-mark">UK</span><div><p>Electricity system analysis</p><h1>Grid Stability Map</h1></div></div>
         <div className="import-actions">
-          <span className="save-indicator" role="status"><Check size={14} />{savedLabel}</span>
-          <label className="register-picker" title="Choose the internal register to use"><Database size={15} /><select value={activeRegisterId} onChange={(event) => selectRegister(event.target.value)} aria-label="Active internal register">{savedRegisters.map((register) => <option key={register.id} value={register.id}>{register.name}</option>)}</select></label>
+          <span className="save-indicator" role="status" title="The shared register is published with this GitHub Pages site. Changes made in this browser are saved locally."><Check size={14} />{savedLabel}</span>
+          <label className="register-picker" title="Choose the published shared register or one of this browser's local copies"><Database size={15} /><select value={activeRegisterId} onChange={(event) => selectRegister(event.target.value)} aria-label="Active register">{savedRegisters.map((register) => <option key={register.id} value={register.id}>{register.name}</option>)}</select></label>
           <button className="icon-text-button backup-button" type="button" onClick={openRegisterSave} title="Save the current register as a named internal copy"><Save size={16} />Save copy</button>
           <input ref={mergeInputRef} type="file" accept="text/csv,.csv" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void mergeCsvRegister(file) }} />
           <button className="icon-text-button backup-button" type="button" onClick={() => mergeInputRef.current?.click()} title="Merge a plant-register CSV into a new internal register copy"><FilePlus2 size={16} />Merge CSV</button>

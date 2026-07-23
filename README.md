@@ -45,7 +45,7 @@ Use the header's register selector to switch between the shared baseline and loc
 
 The site remains publicly readable. The header's **Publish** action is available only after a user authenticates with GitHub and has permission to write to `GPMCentrica/grid-stability-map`. It creates a separate branch and a pull request; it never writes directly to `main`. A maintainer reviews and merges that pull request, then the existing Pages workflow publishes the new baseline.
 
-To enable browser publication, create a GitHub OAuth App for the site, enable its **Device Flow**, and add the OAuth App **Client ID** as the repository Actions variable `GITHUB_OAUTH_CLIENT_ID`. A client ID is public and can be included in the static build; do not add an OAuth client secret, PAT, or other credential to the site or repository. Users may also enter the public client ID in the Publish dialog while testing locally. The access token returned by GitHub is held only in browser memory for that publish session.
+To enable browser publication, create a GitHub OAuth App for the site, enable its **Device Flow**, and add the OAuth App **Client ID** as the repository Actions variable `OAUTH_CLIENT_ID`. A client ID is public and can be included in the static build; do not add an OAuth client secret, PAT, or other credential to the site or repository. Users may also enter the public client ID in the Publish dialog while testing locally. The access token returned by GitHub is held only in browser memory for that publish session.
 
 Merged browser submissions write one of these version-controlled override files, which become the shared default on the next deployment:
 

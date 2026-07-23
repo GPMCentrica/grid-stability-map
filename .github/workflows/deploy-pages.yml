@@ -34,7 +34,7 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
-          VITE_GITHUB_OAUTH_CLIENT_ID: ${{ vars.GITHUB_OAUTH_CLIENT_ID }}
+          VITE_GITHUB_OAUTH_CLIENT_ID: ${{ vars.OAUTH_CLIENT_ID }}
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

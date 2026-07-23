@@ -39,8 +39,8 @@ export interface Plant extends Coordinates {
   netMw: number
   ownerGroup?: string
   projectLocation?: string
-  projectStatus?: 'Proposed' | 'Consented' | 'Under construction' | 'Operational'
-  expectedYearCertainty?: 'high' | 'medium' | 'reasonable'
+  projectStatus?: 'Proposed' | 'In planning' | 'Consented' | 'On hold' | 'Under construction' | 'Operational'
+  expectedYearCertainty?: 'high' | 'medium' | 'reasonable' | 'low'
   connections?: GenerationConnection[]
   commissioningDate?: string
   commissioningBasis?: RetirementBasis

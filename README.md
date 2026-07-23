@@ -23,7 +23,7 @@ The main navigation has five areas: **Retirement**, **Future Generation**, **Cen
 
 - **Retirement** uses the published 17 July 2026 system retirement register and retains the retirement-driven screening overlays.
 - **Future Generation** starts with two clearly labelled sample projects. Its register records project status and confirmed or modelled commissioning timing; replace or add to these samples with governed project data.
-- **Centrica** starts with two clearly labelled sample assets. Replace or add to these samples with current Centrica ownership data.
+- **Centrica** starts with the 29-record operational dataset supplied in `Operational Data.xlsx`, including 18 operational assets and 11 AUC entries. All records remain browser-editable; source lifecycle, voltage, dates, and missing values are retained for review.
 - **Timeline** compares the active Retirement register's scheduled capacity loss with the active Future Generation register's expected commissioning capacity. Centrica is a separate portfolio view and is not added to avoid double counting.
 - **Data quality** can review all portfolios together or one portfolio at a time, and opens a matching record in its own register editor.
 
@@ -41,7 +41,7 @@ The default active register is the **Shared register - 17 Jul 2026** published w
 
 Use the header's register selector to switch between the shared baseline and local saved copies. **Save copy** creates a named local register from the current data, and subsequent edits are saved automatically to that selected register. **Merge CSV** validates a plant-register CSV and creates a separate combined local register, adding new asset IDs and updating matching ones without changing the shared source register. **Restore data** replaces the selected local register from a JSON backup after confirmation; **Backup data** downloads the current register as JSON.
 
-Local registers are stored only in the current browser profile and device through `localStorage` (`uk-grid-stability-workspace-v5`). Clear browser storage, switch browser/profile, or use another device and those local scenarios will not be available unless exported first. The versioned storage key migrates an older v4 retirement workspace into the Retirement portfolio when it is first opened; Future Generation and Centrica then start with their editable sample registers.
+Local registers are stored only in the current browser profile and device through `localStorage` (`uk-grid-stability-workspace-v6`). Clear browser storage, switch browser/profile, or use another device and those local scenarios will not be available unless exported first. The versioned storage key migrates older workspaces when they are first opened. A v5 Centrica sample baseline is preserved as a separate local copy and the workbook-backed operational register becomes active.
 
 ## Published register maintenance
 

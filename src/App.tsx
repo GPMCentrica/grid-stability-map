@@ -21,17 +21,22 @@ type WorkspaceArea = PortfolioId | 'timeline' | 'quality'
 const portfolioDefinitions: Record<PortfolioId, { label: string, registerName: string, workbook: WorkbookData, description: string }> = {
   retirement: { label: 'Retirement', registerName: 'Shared retirement register - 17 Jul 2026', workbook: defaultRegister, description: 'Published system retirement register' },
   'future-generation': { label: 'Future Generation', registerName: 'Future generation sample register', workbook: futureGenerationRegister, description: 'Editable planned generation register' },
-  centrica: { label: 'Centrica', registerName: 'Centrica sample register', workbook: centricaRegister, description: 'Editable Centrica-owned asset register' },
+  centrica: { label: 'Centrica', registerName: 'Centrica operational register', workbook: centricaRegister, description: 'Operational and AUC asset register' },
 }
 
 const isPortfolio = (area: WorkspaceArea): area is PortfolioId => area === 'retirement' || area === 'future-generation' || area === 'centrica'
 const createDefaultPortfolioStore = (portfolio: PortfolioId): PortfolioWorkspaceStore => {
   const definition = portfolioDefinitions[portfolio]
-  return { activeRegisterId: `${portfolio}-published`, registers: [{ id: `${portfolio}-published`, name: definition.registerName, workbook: structuredClone(definition.workbook), savedAt: '' }] }
+  const id = portfolio === 'centrica' ? 'centrica-operational-register' : `${portfolio}-published`
+  return { activeRegisterId: id, registers: [{ id, name: definition.registerName, workbook: structuredClone(definition.workbook), savedAt: '' }] }
 }
 const createInitialWorkspaceStore = (): WorkspaceStore => {
   const stored = loadWorkspaceStore()
-  return { portfolios: { retirement: stored?.portfolios.retirement ?? createDefaultPortfolioStore('retirement'), 'future-generation': stored?.portfolios['future-generation'] ?? createDefaultPortfolioStore('future-generation'), centrica: stored?.portfolios.centrica ?? createDefaultPortfolioStore('centrica') } }
+  const previousCentrica = stored?.portfolios.centrica
+  const centrica = previousCentrica?.registers.some((register) => register.id === 'centrica-published' && register.name === 'Centrica sample register')
+    ? { activeRegisterId: 'centrica-operational-register', registers: [...createDefaultPortfolioStore('centrica').registers, ...previousCentrica.registers.map((register) => register.id === 'centrica-published' ? { ...register, id: 'centrica-sample-register', name: 'Centrica sample register (previous baseline)' } : register)] }
+    : previousCentrica ?? createDefaultPortfolioStore('centrica')
+  return { portfolios: { retirement: stored?.portfolios.retirement ?? createDefaultPortfolioStore('retirement'), 'future-generation': stored?.portfolios['future-generation'] ?? createDefaultPortfolioStore('future-generation'), centrica } }
 }
 
 export default function App() {

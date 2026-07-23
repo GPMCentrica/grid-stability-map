@@ -12,7 +12,7 @@ export function MapPlaceSearch({ plants, onSelect }: { plants: Plant[], onSelect
       const value = query.trim()
       if (value.length < 2) { setResults([]); return }
       const normalized = value.toLowerCase()
-      const registered = plants.filter((plant) => [plant.name, plant.nodeName, plant.region, plant.country].join(' ').toLowerCase().includes(normalized)).slice(0, 5).map((plant) => ({ name: plant.name, description: `Registered plant · ${plant.nodeName || plant.region}`, latitude: plant.latitude, longitude: plant.longitude, registeredPlant: plant }))
+      const registered = plants.filter((plant) => [plant.name, plant.nodeName, plant.region, plant.country, plant.ownerGroup].join(' ').toLowerCase().includes(normalized)).slice(0, 5).map((plant) => ({ name: plant.name, description: `Registered plant · ${plant.nodeName || plant.region} · Owner: ${plant.ownerGroup || 'Not recorded'}`, latitude: plant.latitude, longitude: plant.longitude, registeredPlant: plant }))
       setResults(registered)
       setIsSearching(true)
       try {

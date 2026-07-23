@@ -190,6 +190,7 @@ function PlantPopup({ plant, portfolio }: { plant: Plant, portfolio: PortfolioId
       <dl>
         <div><dt>Technology Type</dt><dd>{plant.technology}</dd></div>
         <div><dt>Net MW</dt><dd>{formatMw(plant.netMw)}</dd></div>
+        <div><dt>Asset owner</dt><dd>{plant.ownerGroup || 'Not recorded'}</dd></div>
         <div><dt>Region</dt><dd>{plant.region || 'Not recorded'}</dd></div>
         <div><dt>Node / Substation</dt><dd>{plant.nodeName || plant.nodeId}</dd></div>
         <div><dt>{portfolio === 'future-generation' ? 'Commissioning outlook' : 'Retirement outlook'}</dt><dd>{portfolio === 'future-generation' ? commissioningLabel(plant) : retirementLabel(plant)}</dd></div>

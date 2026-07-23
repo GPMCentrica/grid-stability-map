@@ -1,6 +1,6 @@
 import type { Plant, PortfolioId, WorkbookData, WorkspaceFilters } from '../models'
 
-const storageKey = 'uk-grid-stability-workspace-v5'
+const storageKey = 'uk-grid-stability-workspace-v6'
 
 const requiredPlantFields = ['assetId', 'name', 'nodeId', 'nodeName', 'region', 'technology'] as const
 
@@ -31,7 +31,7 @@ function parseWorkspaceSnapshot(value: unknown): WorkspaceSnapshot | undefined {
 
 export function loadWorkspaceStore(): WorkspaceStore | undefined {
   try {
-    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem('uk-grid-stability-workspace-v4')
+    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem('uk-grid-stability-workspace-v5') ?? localStorage.getItem('uk-grid-stability-workspace-v4')
     if (!stored) return undefined
     const parsed = JSON.parse(stored) as WorkspaceStore | PortfolioWorkspaceStore | WorkbookData | WorkspaceSnapshot
     if ('portfolios' in parsed && parsed.portfolios && typeof parsed.portfolios === 'object') {
@@ -153,7 +153,7 @@ export function filterPlants(plants: Plant[], filters: WorkspaceFilters) {
       || (filters.confidence === 'medium' && confidence >= 50 && confidence < 75)
       || (filters.confidence === 'low' && confidence < 50)
     return (filters.includeArchived || plant.status !== 'Archived')
-      && (!searchTerm || [plant.name, plant.nodeName, plant.nodeId, plant.region, plant.technology].join(' ').toLowerCase().includes(searchTerm))
+      && (!searchTerm || [plant.name, plant.nodeName, plant.nodeId, plant.region, plant.technology, plant.ownerGroup].join(' ').toLowerCase().includes(searchTerm))
       && (filters.country === 'all' || plant.country === filters.country)
       && (filters.region === 'all' || plant.region === filters.region)
       && (filters.technology === 'all' || plant.technology === filters.technology)

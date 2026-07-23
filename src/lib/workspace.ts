@@ -1,6 +1,6 @@
 import type { Plant, PortfolioId, WorkbookData, WorkspaceFilters } from '../models'
 
-const storageKey = 'uk-grid-stability-workspace-v7'
+const storageKey = 'uk-grid-stability-workspace-v8'
 
 const requiredPlantFields = ['assetId', 'name', 'nodeId', 'nodeName', 'region', 'technology'] as const
 
@@ -31,7 +31,7 @@ function parseWorkspaceSnapshot(value: unknown): WorkspaceSnapshot | undefined {
 
 export function loadWorkspaceStore(): WorkspaceStore | undefined {
   try {
-    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem('uk-grid-stability-workspace-v6') ?? localStorage.getItem('uk-grid-stability-workspace-v5') ?? localStorage.getItem('uk-grid-stability-workspace-v4')
+    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem('uk-grid-stability-workspace-v7') ?? localStorage.getItem('uk-grid-stability-workspace-v6') ?? localStorage.getItem('uk-grid-stability-workspace-v5') ?? localStorage.getItem('uk-grid-stability-workspace-v4')
     if (!stored) return undefined
     const parsed = JSON.parse(stored) as WorkspaceStore | PortfolioWorkspaceStore | WorkbookData | WorkspaceSnapshot
     if ('portfolios' in parsed && parsed.portfolios && typeof parsed.portfolios === 'object') {

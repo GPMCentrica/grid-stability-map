@@ -11,7 +11,7 @@ button { cursor: pointer; }
 .app-header { min-height: 68px; padding: 10px 24px; color: #f8fbfb; background: #0e2b33; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 1px 0 rgba(255,255,255,.1) inset; }
 .brand-lockup, .import-actions, .control-bar, .segmented-control, .retired-control, .map-legend > div, .technology-key, .selected-node { display: flex; align-items: center; }
 .brand-lockup { gap: 11px; }
-.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #73b8ae; color: #c9eee5; font-size: 12px; font-weight: 750; }
+.brand-mark { display: block; width: 38px; height: 38px; border: 0; background: url('/favicon.svg') center / contain no-repeat; font-size: 0; }
 .brand-lockup p, .brand-lockup h1 { margin: 0; }
 .brand-lockup p { color: #a8bec1; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: 1px; }
 .brand-lockup h1 { font-size: 18px; font-weight: 700; }

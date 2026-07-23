@@ -1,5 +1,5 @@
 import type { HorizonYear, NeedLayer, Plant } from '../models'
-import { isRetiredByYear } from './risk'
+import { effectiveCommissioningYear, isRetiredByYear } from './risk'
 
 export interface LocationNeed {
   nodeId: string
@@ -33,12 +33,12 @@ const technologyProvisions: { match: RegExp, provision: TechnologyProvision }[] 
 
 const defaultProvision: TechnologyProvision = { inertia: 3.5, scl: 2.5, voltage: 0.35 }
 
-const proxyFor = (plant: Plant, layer: Exclude<NeedLayer, 'none'>) => {
+const proxyFor = (plant: Plant, layer: Exclude<NeedLayer, 'none' | 'ibr'>) => {
   const profile = technologyProvisions.find(({ match }) => match.test(plant.technology.toLowerCase()))?.provision ?? defaultProvision
   return plant.netMw * profile[layer]
 }
 
-export function getLocationNeeds(plants: Plant[], year: HorizonYear, layer: Exclude<NeedLayer, 'none'>): LocationNeed[] {
+export function getLocationNeeds(plants: Plant[], year: HorizonYear, layer: Exclude<NeedLayer, 'none' | 'ibr'>): LocationNeed[] {
   const locations = new Map<string, Plant[]>()
   plants.filter((plant) => plant.hasCoordinates && plant.status !== 'Archived').forEach((plant) => {
     locations.set(plant.nodeId, [...(locations.get(plant.nodeId) ?? []), plant])
@@ -73,4 +73,30 @@ export function needColour(need: number) {
   if (need >= 0.7) return '#a50091'
   if (need >= 0.3) return '#b999f6'
   return '#29b263'
+}
+
+export interface IbrLocation {
+  nodeId: string
+  nodeName: string
+  latitude: number
+  longitude: number
+  ibrMw: number
+}
+
+const defaultIbrContributionMw = (plant: Plant) => /wind|solar|battery|bess|inverter/i.test(plant.technology) ? plant.netMw : 0
+
+export function getIbrPenetrationLocations(plants: Plant[], year: HorizonYear): IbrLocation[] {
+  const locations = new Map<string, IbrLocation>()
+  plants.filter((plant) => plant.status !== 'Archived').forEach((plant) => {
+    const commissioningYear = effectiveCommissioningYear(plant)
+    if (commissioningYear && commissioningYear > year) return
+    const ibrMw = plant.ibrContributionMw ?? defaultIbrContributionMw(plant)
+    if (!ibrMw) return
+    ;(plant.connections ?? []).forEach((connection) => {
+      const key = `${connection.nodeName}:${connection.latitude}:${connection.longitude}`
+      const existing = locations.get(key)
+      locations.set(key, existing ? { ...existing, ibrMw: existing.ibrMw + ibrMw } : { nodeId: plant.nodeId, nodeName: connection.nodeName, latitude: connection.latitude, longitude: connection.longitude, ibrMw })
+    })
+  })
+  return [...locations.values()]
 }

@@ -3,7 +3,7 @@ export type RiskLevel = 'low' | 'medium' | 'high'
 export type RetiredAssetMode = 'hide' | 'fade'
 export type PlantStatus = 'Active' | 'Retiring' | 'Retired' | 'Archived'
 export type PortfolioId = 'retirement' | 'future-generation' | 'centrica'
-export type NeedLayer = 'none' | 'inertia' | 'scl' | 'voltage'
+export type NeedLayer = 'none' | 'inertia' | 'scl' | 'voltage' | 'ibr'
 export interface NetworkLayerOptions {
   transmission: boolean
   substations: boolean
@@ -25,7 +25,7 @@ export interface PlaceResult extends Coordinates {
 
 export interface GenerationConnection extends Coordinates {
   nodeName: string
-  certainty: 'confirmed' | 'estimated'
+  certainty: 'confirmed' | 'estimated' | 'reasonable'
 }
 
 export interface Plant extends Coordinates {
@@ -39,9 +39,9 @@ export interface Plant extends Coordinates {
   netMw: number
   ownerGroup?: string
   projectLocation?: string
-  projectStatus?: 'Proposed' | 'In planning' | 'Consented' | 'On hold' | 'Under construction' | 'Operational'
-  expectedYearCertainty?: 'high' | 'medium' | 'reasonable' | 'low'
+  projectStatus?: 'Proposed' | 'In planning' | 'Consented' | 'On hold' | 'Lease' | 'Lease awarded' | 'Under construction' | 'Operational'
   connections?: GenerationConnection[]
+  ibrContributionMw?: number
   commissioningDate?: string
   commissioningBasis?: RetirementBasis
   modelledCommissioningYear?: number

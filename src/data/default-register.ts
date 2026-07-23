@@ -5,6 +5,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-001",
       "name": "Heysham 1",
+      "ownerGroup": "EDF Energy",
       "nodeId": "NODE-HEY",
       "nodeName": "Heysham",
       "region": "North West",
@@ -30,6 +31,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-002",
       "name": "Hartlepool",
+      "ownerGroup": "EDF Energy",
       "nodeId": "NODE-HPL",
       "nodeName": "Hartlepool",
       "region": "North East",
@@ -55,6 +57,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-003",
       "name": "Heysham 2",
+      "ownerGroup": "EDF Energy",
       "nodeId": "NODE-HEY",
       "nodeName": "Heysham",
       "region": "North West",
@@ -80,6 +83,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-004",
       "name": "Torness",
+      "ownerGroup": "EDF Energy",
       "nodeId": "NODE-TOR",
       "nodeName": "Torness",
       "region": "Scotland",
@@ -105,6 +109,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-005",
       "name": "Sizewell B",
+      "ownerGroup": "EDF Energy",
       "nodeId": "NODE-SIZ",
       "nodeName": "Sizewell",
       "region": "East of England",
@@ -130,6 +135,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-006",
       "name": "Drax Power Station",
+      "ownerGroup": "Drax Group",
       "nodeId": "NODE-DRX",
       "nodeName": "Drax",
       "region": "Yorkshire",
@@ -155,6 +161,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-007",
       "name": "Severn Power",
+      "ownerGroup": "Centrica",
       "nodeId": "NODE-SEV",
       "nodeName": "Uskmouth / Severn",
       "region": "South Wales",
@@ -179,6 +186,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-008",
       "name": "Didcot B",
+      "ownerGroup": "RWE",
       "nodeId": "NODE-DID",
       "nodeName": "Didcot",
       "region": "South East",
@@ -203,6 +211,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-009",
       "name": "Staythorpe",
+      "ownerGroup": "RWE",
       "nodeId": "NODE-STY",
       "nodeName": "Staythorpe",
       "region": "East Midlands",
@@ -227,6 +236,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-010",
       "name": "Pembroke",
+      "ownerGroup": "RWE",
       "nodeId": "NODE-PEM",
       "nodeName": "Pembroke",
       "region": "South Wales",
@@ -251,6 +261,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-011",
       "name": "Keadby 1",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-KEA",
       "nodeName": "Keadby / Brigg",
       "region": "Yorkshire & Humber",
@@ -275,6 +286,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-012",
       "name": "Brigg legacy CCGT",
+      "ownerGroup": "Centrica",
       "nodeId": "NODE-KEA",
       "nodeName": "Keadby / Brigg",
       "region": "Yorkshire & Humber",
@@ -300,6 +312,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-013",
       "name": "Ratcliffe-on-Soar",
+      "ownerGroup": "Uniper",
       "nodeId": "NODE-RAT",
       "nodeName": "Ratcliffe",
       "region": "East Midlands",
@@ -325,6 +338,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-014",
       "name": "Lynemouth",
+      "ownerGroup": "EP UK Investments",
       "nodeId": "NODE-LYN",
       "nodeName": "Lynemouth",
       "region": "North East",
@@ -374,6 +388,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-016",
       "name": "Dinorwig",
+      "ownerGroup": "First Hydro Company (ENGIE / CDPQ)",
       "nodeId": "NODE-PEN",
       "nodeName": "Pentir",
       "region": "North Wales",
@@ -399,6 +414,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-017",
       "name": "Ffestiniog",
+      "ownerGroup": "First Hydro Company (ENGIE / CDPQ)",
       "nodeId": "NODE-TRA",
       "nodeName": "Trawsfynydd",
       "region": "North Wales",
@@ -424,6 +440,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-018",
       "name": "Cruachan 1",
+      "ownerGroup": "Drax Group",
       "nodeId": "NODE-CRU",
       "nodeName": "Dalmally",
       "region": "Scotland",
@@ -449,6 +466,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-019",
       "name": "Foyers",
+      "ownerGroup": "SSE",
       "nodeId": "NODE-FOY",
       "nodeName": "Fort Augustus",
       "region": "Scotland",
@@ -474,6 +492,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-020",
       "name": "Little Barford",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-LBF",
       "nodeName": "Little Barford",
       "region": "East of England",
@@ -498,6 +517,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-021",
       "name": "Medway",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-GRA",
       "nodeName": "Isle of Grain",
       "region": "South East",
@@ -522,6 +542,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-022",
       "name": "Connah's Quay",
+      "ownerGroup": "Uniper",
       "nodeId": "NODE-CNQ",
       "nodeName": "Connah's Quay",
       "region": "North Wales",
@@ -546,6 +567,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-023",
       "name": "Keadby 2",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-KEA",
       "nodeName": "Keadby / Brigg",
       "region": "Yorkshire & Humber",
@@ -570,6 +592,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-024",
       "name": "Sutton Bridge",
+      "ownerGroup": "VPI",
       "nodeId": "NODE-STB",
       "nodeName": "Sutton Bridge",
       "region": "East Midlands",
@@ -594,6 +617,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-025",
       "name": "Saltend CHP",
+      "ownerGroup": "SSE Thermal / Equinor",
       "nodeId": "NODE-SLT",
       "nodeName": "Saltend",
       "region": "Yorkshire & Humber",
@@ -618,6 +642,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-026",
       "name": "Damhead Creek",
+      "ownerGroup": "VPI",
       "nodeId": "NODE-DHC",
       "nodeName": "Damhead Creek",
       "region": "South East",
@@ -642,6 +667,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-027",
       "name": "Immingham CHP (VPI)",
+      "ownerGroup": "VPI",
       "nodeId": "NODE-IMM",
       "nodeName": "Immingham",
       "region": "Yorkshire & Humber",
@@ -667,6 +693,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-028",
       "name": "West Burton B",
+      "ownerGroup": "TotalEnergies",
       "nodeId": "NODE-WBB",
       "nodeName": "West Burton",
       "region": "East Midlands",
@@ -691,6 +718,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-029",
       "name": "Peterhead",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-PHD",
       "nodeName": "Peterhead",
       "region": "Scotland",
@@ -716,6 +744,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-030",
       "name": "Keadby 3 (CCS)",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-KEA",
       "nodeName": "Keadby / Brigg",
       "region": "Yorkshire & Humber",
@@ -741,6 +770,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-031",
       "name": "Peterhead 2 (CCS)",
+      "ownerGroup": "SSE Thermal / Equinor",
       "nodeId": "NODE-PHD",
       "nodeName": "Peterhead",
       "region": "Scotland",
@@ -766,6 +796,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "AST-032",
       "name": "Staythorpe (CCS retrofit)",
+      "ownerGroup": "RWE",
       "nodeId": "NODE-STY",
       "nodeName": "Staythorpe",
       "region": "East Midlands",
@@ -791,6 +822,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-001",
       "name": "Aghada Power Station",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-IE-AGH",
       "nodeName": "Aghada",
       "country": "Republic of Ireland",
@@ -813,6 +845,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-002",
       "name": "Dublin Bay Power",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-IE-DBP",
       "nodeName": "Dublin Bay / Ringsend",
       "country": "Republic of Ireland",
@@ -835,6 +868,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-003",
       "name": "Poolbeg CCGT",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-IE-PBG",
       "nodeName": "Poolbeg",
       "country": "Republic of Ireland",
@@ -857,6 +891,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-004",
       "name": "Huntstown Unit 1",
+      "ownerGroup": "Energia Group",
       "nodeId": "NODE-IE-HUN",
       "nodeName": "Huntstown",
       "country": "Republic of Ireland",
@@ -879,6 +914,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-005",
       "name": "Huntstown Unit 2",
+      "ownerGroup": "Energia Group",
       "nodeId": "NODE-IE-HUN",
       "nodeName": "Huntstown",
       "country": "Republic of Ireland",
@@ -901,6 +937,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-006",
       "name": "Whitegate Power Station",
+      "ownerGroup": "Bord Gáis Energy (Centrica)",
       "nodeId": "NODE-IE-WHT",
       "nodeName": "Whitegate",
       "country": "Republic of Ireland",
@@ -923,6 +960,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-007",
       "name": "Tynagh Power Station",
+      "ownerGroup": "EP UK Investments",
       "nodeId": "NODE-IE-TYN",
       "nodeName": "Tynagh",
       "country": "Republic of Ireland",
@@ -945,6 +983,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-CCGT-008",
       "name": "Great Island Power Station",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-IE-GRI",
       "nodeName": "Great Island",
       "country": "Republic of Ireland",
@@ -967,6 +1006,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-HFO-001",
       "name": "Moneypoint Units 1-3",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-IE-MNP",
       "nodeName": "Moneypoint",
       "country": "Republic of Ireland",
@@ -987,6 +1027,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-OCGT-001",
       "name": "Tarbert Temporary Emergency Generation",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-IE-TAR",
       "nodeName": "Tarbert",
       "country": "Republic of Ireland",
@@ -1007,6 +1048,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-OCGT-002",
       "name": "Tarbert Next Generation Power Station",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-IE-TAR",
       "nodeName": "Tarbert",
       "country": "Republic of Ireland",
@@ -1029,6 +1071,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-HFO-002",
       "name": "Tarbert Old Power Station",
+      "ownerGroup": "SSE Thermal",
       "nodeId": "NODE-IE-TAR-OLD",
       "nodeName": "Tarbert",
       "country": "Republic of Ireland",
@@ -1049,6 +1092,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-BIO-001",
       "name": "Edenderry Power Plant",
+      "ownerGroup": "Bord na Móna",
       "nodeId": "NODE-IE-EDN",
       "nodeName": "Edenderry",
       "country": "Republic of Ireland",
@@ -1093,6 +1137,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-WTE-001",
       "name": "Dublin Waste-to-Energy",
+      "ownerGroup": "Covanta Energy",
       "nodeId": "NODE-IE-DWTE",
       "nodeName": "Poolbeg / Dublin Waste",
       "country": "Republic of Ireland",
@@ -1115,6 +1160,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-HYDRO-001",
       "name": "Turlough Hill Pumped Storage",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-IE-TUR",
       "nodeName": "Turlough Hill",
       "country": "Republic of Ireland",
@@ -1137,6 +1183,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "IE-HYDRO-002",
       "name": "Ardnacrusha Hydro Station",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-IE-ARN",
       "nodeName": "Ardnacrusha",
       "country": "Republic of Ireland",
@@ -1159,6 +1206,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "NI-CCGT-001",
       "name": "Ballylumford Power Station",
+      "ownerGroup": "EP UK Investments",
       "nodeId": "NODE-NI-BLY",
       "nodeName": "Ballylumford",
       "country": "Northern Ireland",
@@ -1181,6 +1229,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "NI-CCGT-002",
       "name": "Coolkeeragh Power Station",
+      "ownerGroup": "ESB",
       "nodeId": "NODE-NI-CLK",
       "nodeName": "Coolkeeragh",
       "country": "Northern Ireland",
@@ -1203,6 +1252,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "NI-OCGT-001",
       "name": "Kilroot Energy Park / OCGT",
+      "ownerGroup": "EP UK Investments",
       "nodeId": "NODE-NI-KLR",
       "nodeName": "Kilroot",
       "country": "Northern Ireland",
@@ -1225,6 +1275,7 @@ export const defaultRegister: WorkbookData = {
     {
       "assetId": "NI-BIO-001",
       "name": "Lisahally Power Station",
+      "ownerGroup": "Evermore Energy",
       "nodeId": "NODE-NI-LIS",
       "nodeName": "Lisahally",
       "country": "Northern Ireland",

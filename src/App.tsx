@@ -27,16 +27,20 @@ const portfolioDefinitions: Record<PortfolioId, { label: string, registerName: s
 const isPortfolio = (area: WorkspaceArea): area is PortfolioId => area === 'retirement' || area === 'future-generation' || area === 'centrica'
 const createDefaultPortfolioStore = (portfolio: PortfolioId): PortfolioWorkspaceStore => {
   const definition = portfolioDefinitions[portfolio]
-  const id = portfolio === 'centrica' ? 'centrica-operational-register' : `${portfolio}-published`
+  const id = portfolio === 'retirement' ? 'retirement-owner-register' : portfolio === 'centrica' ? 'centrica-operational-register' : `${portfolio}-published`
   return { activeRegisterId: id, registers: [{ id, name: definition.registerName, workbook: structuredClone(definition.workbook), savedAt: '' }] }
 }
 const createInitialWorkspaceStore = (): WorkspaceStore => {
   const stored = loadWorkspaceStore()
+  const previousRetirement = stored?.portfolios.retirement
+  const retirement = previousRetirement?.registers.some((register) => ['published-register', 'retirement-published'].includes(register.id))
+    ? { activeRegisterId: 'retirement-owner-register', registers: [...createDefaultPortfolioStore('retirement').registers, ...previousRetirement.registers.map((register) => ['published-register', 'retirement-published'].includes(register.id) ? { ...register, id: 'retirement-previous-baseline', name: 'Shared retirement register (previous baseline)' } : register)] }
+    : previousRetirement ?? createDefaultPortfolioStore('retirement')
   const previousCentrica = stored?.portfolios.centrica
   const centrica = previousCentrica?.registers.some((register) => register.id === 'centrica-published' && register.name === 'Centrica sample register')
     ? { activeRegisterId: 'centrica-operational-register', registers: [...createDefaultPortfolioStore('centrica').registers, ...previousCentrica.registers.map((register) => register.id === 'centrica-published' ? { ...register, id: 'centrica-sample-register', name: 'Centrica sample register (previous baseline)' } : register)] }
     : previousCentrica ?? createDefaultPortfolioStore('centrica')
-  return { portfolios: { retirement: stored?.portfolios.retirement ?? createDefaultPortfolioStore('retirement'), 'future-generation': stored?.portfolios['future-generation'] ?? createDefaultPortfolioStore('future-generation'), centrica } }
+  return { portfolios: { retirement, 'future-generation': stored?.portfolios['future-generation'] ?? createDefaultPortfolioStore('future-generation'), centrica } }
 }
 
 export default function App() {

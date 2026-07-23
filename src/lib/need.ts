@@ -70,7 +70,7 @@ export function needLabel(need: number) {
 }
 
 export function needColour(need: number) {
-  if (need >= 0.7) return '#c53b3e'
-  if (need >= 0.3) return '#d7901a'
-  return '#1f8a56'
+  if (need >= 0.7) return '#a50091'
+  if (need >= 0.3) return '#b999f6'
+  return '#29b263'
 }

@@ -1,6 +1,6 @@
 import type { HorizonYear, Plant, RiskLevel, RiskNode } from '../models'
 
-export const technologyColours = ['#006e75', '#2e8b57', '#d27800', '#6654a5', '#a93d5c', '#496b9c', '#58706f']
+export const technologyColours = ['#0f2067', '#85db9c', '#b999f6', '#664fad', '#d03e9d', '#3675c2', '#036130']
 
 export function technologyColour(technology: string) {
   const hash = [...technology].reduce((total, character) => total + character.charCodeAt(0), 0)
@@ -50,7 +50,7 @@ export function riskLevel(deficit: number): RiskLevel {
 }
 
 export function riskColour(deficit: number) {
-  return { low: '#1f8a56', medium: '#d7901a', high: '#c53b3e' }[riskLevel(deficit)]
+  return { low: '#29b263', medium: '#b999f6', high: '#a50091' }[riskLevel(deficit)]
 }
 
 export function riskLabel(deficit: number) {

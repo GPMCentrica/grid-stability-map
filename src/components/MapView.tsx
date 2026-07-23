@@ -28,9 +28,9 @@ interface HeatPoint {
 }
 
 const heatProfiles = {
-  scl: { radiusKm: 30, colour: [222, 69, 42] },
-  voltage: { radiusKm: 60, colour: [20, 133, 196] },
-  inertia: { radiusKm: 100, colour: [20, 137, 117] },
+  scl: { radiusKm: 30, colour: [165, 0, 145] },
+  voltage: { radiusKm: 60, colour: [54, 117, 194] },
+  inertia: { radiusKm: 100, colour: [41, 178, 99] },
 } as const
 
 function NeedHeatmap({ layer, points, opacity }: { layer: Exclude<NeedLayer, 'none'>, points: HeatPoint[], opacity: number }) {
@@ -111,7 +111,7 @@ function NetworkOverlay({ enabled, options }: { enabled: boolean, options: Netwo
       if (!options.substations) return []
       const future = isFuture(properties)
       if (future && !options.future) return []
-      return { color: future ? '#825bb0' : '#285a86', fillColor: future ? '#825bb0' : '#285a86', weight: 1.5, fillOpacity: .5, radius: 4 }
+      return { color: future ? '#b999f6' : '#0f2067', fillColor: future ? '#b999f6' : '#0f2067', weight: 1.5, fillOpacity: .5, radius: 4 }
     }
     const layer = vectorGrid.protobuf('https://openinframap.org/tiles/{z}/{x}/{y}.pbf', {
       interactive: false,
@@ -121,8 +121,8 @@ function NetworkOverlay({ enabled, options }: { enabled: boolean, options: Netwo
           const future = isFuture(properties)
           const level = voltage(properties)
           if (future && !options.future) return []
-          if (level >= 220 && options.transmission) return { color: future ? '#825bb0' : '#285a86', weight: level >= 400 ? 3.5 : 2.8, opacity: .9, dashArray: future ? '7 7' : undefined }
-          if (level >= 110 && level < 220 && options.lowerVoltage) return { color: future ? '#825bb0' : '#5f8aa7', weight: 1.6, opacity: .75, dashArray: future ? '6 6' : undefined }
+          if (level >= 220 && options.transmission) return { color: future ? '#b999f6' : '#0f2067', weight: level >= 400 ? 3.5 : 2.8, opacity: .9, dashArray: future ? '7 7' : undefined }
+          if (level >= 110 && level < 220 && options.lowerVoltage) return { color: future ? '#b999f6' : '#3675c2', weight: 1.6, opacity: .75, dashArray: future ? '6 6' : undefined }
           return []
         },
         power_substation: substationStyle,

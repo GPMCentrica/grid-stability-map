@@ -64,7 +64,7 @@ function NeedHeatmap({ layer, points, opacity }: { layer: Exclude<NeedLayer, 'no
         const centre = map.latLngToLayerPoint([point.latitude, point.longitude]).subtract(origin)
         const metresPerPixel = 40075016.686 * Math.cos(point.latitude * Math.PI / 180) / (2 ** (map.getZoom() + 8))
         const radius = Math.max(18, profile.radiusKm * 1000 / metresPerPixel)
-        const alpha = (0.14 + point.intensity * 0.41) * opacity
+        const alpha = (0.20 + point.intensity * 0.65) * opacity
         const gradient = context.createRadialGradient(centre.x, centre.y, 0, centre.x, centre.y, radius)
         gradient.addColorStop(0, `rgba(${profile.colour.join(', ')}, ${alpha})`)
         gradient.addColorStop(0.28, `rgba(${profile.colour.join(', ')}, ${alpha * 0.55})`)

@@ -3,7 +3,7 @@ import L from 'leaflet'
 import { useEffect, useState } from 'react'
 import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet.vectorgrid'
-import { getLocationNeeds } from '../lib/need'
+import { getIbrPenetrationLocations, getLocationNeeds } from '../lib/need'
 import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, PortfolioId, RetiredAssetMode } from '../models'
 import { effectiveCommissioningYear, effectiveRetirementYear, formatMw, retirementLabel, technologyColour } from '../lib/risk'
 
@@ -31,6 +31,7 @@ const heatProfiles = {
   scl: { radiusKm: 30, colour: [165, 0, 145] },
   voltage: { radiusKm: 60, colour: [54, 117, 194] },
   inertia: { radiusKm: 100, colour: [41, 178, 99] },
+  ibr: { radiusKm: 70, colour: [208, 62, 157] },
 } as const
 
 function NeedHeatmap({ layer, points, opacity }: { layer: Exclude<NeedLayer, 'none'>, points: HeatPoint[], opacity: number }) {
@@ -193,7 +194,7 @@ function PlantPopup({ plant, portfolio }: { plant: Plant, portfolio: PortfolioId
         <div><dt>Capacity</dt><dd>{formatMw(plant.netMw)}</dd></div>
         <div><dt>Status</dt><dd>{plant.projectStatus || 'Not recorded'}</dd></div>
         <div><dt>Expected online</dt><dd>{effectiveCommissioningYear(plant) ?? 'Not recorded'}</dd></div>
-        <div><dt>Year certainty</dt><dd>{plant.expectedYearCertainty || 'Not recorded'}</dd></div>
+        <div><dt>Confidence</dt><dd>{plant.confidenceScore ? `${plant.confidenceScore}/100` : 'Not scored'}</dd></div>
       </dl>
     </div>
   )
@@ -232,9 +233,12 @@ function FutureConnections({ plants, year }: { plants: Plant[], year: HorizonYea
 export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, heatOpacity, networkLayer, networkOptions, portfolio, focusedPlant, focusedPlace, onPlantSelect }: MapViewProps) {
   const visiblePlants = plants
   const activeNeedLayer = needLayer === 'none' ? undefined : needLayer
-  const locationNeeds = activeNeedLayer ? getLocationNeeds(plants, year, activeNeedLayer) : []
+  const retirementNeedLayer = activeNeedLayer === 'ibr' ? undefined : activeNeedLayer
+  const locationNeeds = retirementNeedLayer ? getLocationNeeds(plants, year, retirementNeedLayer) : []
+  const ibrLocations = activeNeedLayer === 'ibr' && portfolio === 'future-generation' ? getIbrPenetrationLocations(plants, year) : []
   const largestServiceLoss = Math.max(1, ...locationNeeds.map((location) => location.retiringService))
   const largestLocationalImportance = Math.max(0.001, ...locationNeeds.map((location) => Math.sqrt(location.need * location.retiringService / largestServiceLoss)))
+  const largestIbrMw = Math.max(1, ...ibrLocations.map((location) => location.ibrMw))
 
   return (
     <MapContainer center={[55.4, -3.2]} zoom={5.7} minZoom={5} zoomControl={false} className="map-canvas">
@@ -246,7 +250,8 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, he
       <PlantFocus plant={focusedPlant} place={focusedPlace} />
       <MapClickDeselect onDeselect={() => onPlantSelect()} />
       <NetworkOverlay enabled={networkLayer} options={networkOptions} />
-      {activeNeedLayer && <NeedHeatmap layer={activeNeedLayer} opacity={heatOpacity} points={locationNeeds.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: Math.sqrt(location.need * location.retiringService / largestServiceLoss) / largestLocationalImportance }))} />}
+      {retirementNeedLayer && <NeedHeatmap layer={retirementNeedLayer} opacity={heatOpacity} points={locationNeeds.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: Math.sqrt(location.need * location.retiringService / largestServiceLoss) / largestLocationalImportance }))} />}
+      {activeNeedLayer === 'ibr' && <NeedHeatmap layer="ibr" opacity={heatOpacity} points={ibrLocations.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: location.ibrMw / largestIbrMw }))} />}
       {portfolio === 'future-generation' && <FutureConnections plants={visiblePlants} year={year} />}
       {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year, portfolio)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} portfolio={portfolio} /></Popup></Marker>)}
     </MapContainer>

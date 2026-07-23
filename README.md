@@ -41,6 +41,20 @@ The default active register is the **Shared register - 17 Jul 2026** published w
 
 Use the header's register selector to switch between the shared baseline and local saved copies. **Save copy** creates a named local register from the current data, and subsequent edits are saved automatically to that selected register. **Merge CSV** validates a plant-register CSV and creates a separate combined local register, adding new asset IDs and updating matching ones without changing the shared source register. **Restore data** replaces the selected local register from a JSON backup after confirmation; **Backup data** downloads the current register as JSON.
 
+### Submit a register change through GitHub
+
+The site remains publicly readable. The header's **Publish** action is available only after a user authenticates with GitHub and has permission to write to `GPMCentrica/grid-stability-map`. It creates a separate branch and a pull request; it never writes directly to `main`. A maintainer reviews and merges that pull request, then the existing Pages workflow publishes the new baseline.
+
+To enable browser publication, create a GitHub OAuth App for the site, enable its **Device Flow**, and add the OAuth App **Client ID** as the repository Actions variable `GITHUB_OAUTH_CLIENT_ID`. A client ID is public and can be included in the static build; do not add an OAuth client secret, PAT, or other credential to the site or repository. Users may also enter the public client ID in the Publish dialog while testing locally. The access token returned by GitHub is held only in browser memory for that publish session.
+
+Merged browser submissions write one of these version-controlled override files, which become the shared default on the next deployment:
+
+- `src/data/published-retirement-register.json`
+- `src/data/published-future-generation-register.json`
+- `src/data/published-centrica-register.json`
+
+When a published override changes, the application detects the changed baseline and makes it active for users who were using the previous shared baseline. Existing named local scenarios remain available in the register selector.
+
 Local registers are stored only in the current browser profile and device through `localStorage` (`uk-grid-stability-workspace-v8`). Clear browser storage, switch browser/profile, or use another device and those local scenarios will not be available unless exported first. The versioned storage key migrates older workspaces when they are first opened. A v5 Centrica sample baseline is preserved as a separate local copy, the v7 migration activates the owner-enriched retirement baseline, and the v8 migration activates the updated Centrica operational register while retaining its prior baseline as a separate local copy.
 
 ## Published register maintenance

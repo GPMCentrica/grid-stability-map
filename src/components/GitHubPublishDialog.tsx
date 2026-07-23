@@ -17,7 +17,7 @@ const portfolioLabel: Record<PortfolioId, string> = {
 }
 
 export function GitHubPublishDialog({ portfolio, registerName, workbook, onClose }: GitHubPublishDialogProps) {
-  const [clientId, setClientId] = useState(() => import.meta.env.VITE_GITHUB_OAUTH_CLIENT_ID || localStorage.getItem('grid-stability-github-client-id') || '')
+  const clientId = import.meta.env.VITE_GITHUB_OAUTH_CLIENT_ID?.trim()
   const [deviceCode, setDeviceCode] = useState<{ userCode: string, verificationUri: string }>()
   const [token, setToken] = useState('')
   const [user, setUser] = useState('')
@@ -26,21 +26,16 @@ export function GitHubPublishDialog({ portfolio, registerName, workbook, onClose
   const [pullRequestUrl, setPullRequestUrl] = useState('')
 
   const beginSignIn = async () => {
-    const trimmedClientId = clientId.trim()
-    if (!trimmedClientId) {
-      setError('Enter the GitHub OAuth App client ID configured for this site.')
-      return
-    }
-    localStorage.setItem('grid-stability-github-client-id', trimmedClientId)
+    if (!clientId) return
     setError('')
     setStatus('Requesting a GitHub verification code...')
     try {
-      const device = await startDeviceAuthorization(trimmedClientId)
+      const device = await startDeviceAuthorization(clientId)
       setDeviceCode({ userCode: device.user_code, verificationUri: device.verification_uri })
       setStatus('Waiting for GitHub authorization...')
       const poll = async (interval: number): Promise<void> => {
         await new Promise<void>((resolve) => window.setTimeout(resolve, interval * 1000))
-        const response = await pollDeviceAuthorization(trimmedClientId, device.device_code)
+        const response = await pollDeviceAuthorization(clientId, device.device_code)
         if (response.access_token) {
           const account = await getGitHubUser(response.access_token)
           setToken(response.access_token)
@@ -78,7 +73,8 @@ export function GitHubPublishDialog({ portfolio, registerName, workbook, onClose
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><section className="github-publish-dialog" role="dialog" aria-modal="true" aria-label="Publish register to GitHub" onMouseDown={(event) => event.stopPropagation()}>
     <header><div><p>GitHub publication</p><h2>Submit {portfolioLabel[portfolio]} register</h2></div><button className="close-button" type="button" onClick={onClose} aria-label="Close GitHub publication dialog"><X size={18} /></button></header>
     <div className="publish-summary"><Github size={19} /><div><strong>{registerName}</strong><span>{workbook.plants.length} records will be submitted in a pull request to `GPMCentrica/grid-stability-map`.</span></div></div>
-    {!token && <><label>OAuth App client ID<input value={clientId} onChange={(event) => setClientId(event.target.value)} placeholder="Iv1..." autoComplete="off" /></label><button className="primary-action github-sign-in" type="button" onClick={() => void beginSignIn()} disabled={Boolean(status) && !deviceCode}><KeyRound size={16} />Sign in with GitHub</button></>}
+    {!clientId && <div className="publish-unavailable"><KeyRound size={18} /><div><strong>Publishing is not enabled yet</strong><span>A site administrator must add the `OAUTH_CLIENT_ID` repository Actions variable, then let GitHub Pages deploy the updated build.</span></div></div>}
+    {clientId && !token && <button className="primary-action github-sign-in" type="button" onClick={() => void beginSignIn()} disabled={Boolean(status) && !deviceCode}><KeyRound size={16} />Sign in with GitHub</button>}
     {deviceCode && !token && <div className="device-code"><span>At GitHub, enter this code:</span><strong>{deviceCode.userCode}</strong><a href={deviceCode.verificationUri} target="_blank" rel="noreferrer">Open GitHub verification <ExternalLink size={14} /></a></div>}
     {token && !pullRequestUrl && <button className="primary-action github-publish" type="button" onClick={() => void publish()}><Send size={16} />Create pull request</button>}
     {pullRequestUrl && <a className="primary-action github-pr-link" href={pullRequestUrl} target="_blank" rel="noreferrer"><Check size={16} />Open pull request <ExternalLink size={14} /></a>}

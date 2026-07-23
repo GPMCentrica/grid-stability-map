@@ -1,10 +1,16 @@
 import type { HorizonYear, Plant, RiskLevel, RiskNode } from '../models'
 
-export const technologyColours = ['#0f2067', '#85db9c', '#b999f6', '#664fad', '#d03e9d', '#3675c2', '#036130']
-
 export function technologyColour(technology: string) {
-  const hash = [...technology].reduce((total, character) => total + character.charCodeAt(0), 0)
-  return technologyColours[hash % technologyColours.length]
+  const value = technology.toLowerCase()
+  if (value.includes('nuclear')) return '#0f2067'
+  if (value.includes('pumped storage') || value === 'hydro') return '#036130'
+  if (value.includes('battery') || value.includes('bess') || value.includes('ldes') || value.includes('laes')) return '#b999f6'
+  if (value.includes('wind')) return '#29b263'
+  if (value.includes('solar')) return '#85db9c'
+  if (value.includes('biomass') || value.includes('waste')) return '#664fad'
+  if (value.includes('coal') || value.includes('oil') || value.includes('hfo') || value.includes('emergency')) return '#a50091'
+  if (value.includes('ccgt') || value.includes('ocgt') || value.includes('gas')) return '#3675c2'
+  return '#7b92a3'
 }
 
 export function isRetiredByYear(plant: Plant, year: HorizonYear) {

@@ -1,8 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { Building2, Check, Database, Download, FilePlus2, GitPullRequest, Map, Moon, Network, Rocket, Save, Sun, TableProperties, TimerReset, Upload, X } from 'lucide-react'
+import { Building2, Check, Database, Download, FilePlus2, Map, Moon, Network, Rocket, Save, Sun, TableProperties, TimerReset, Upload, X } from 'lucide-react'
 import { DashboardPanel } from './components/DashboardPanel'
 import { DataQualityView } from './components/DataQualityView'
-import { GitHubPublishDialog } from './components/GitHubPublishDialog'
 import { MapView } from './components/MapView'
 import { MapPlaceSearch } from './components/MapPlaceSearch'
 import { RegisterView } from './components/RegisterView'
@@ -10,9 +9,6 @@ import { TimelineView } from './components/TimelineView'
 import { centricaRegister } from './data/centrica-register'
 import { defaultRegister } from './data/default-register'
 import { futureGenerationRegister } from './data/future-generation-register'
-import publishedCentricaRegister from './data/published-centrica-register.json'
-import publishedFutureGenerationRegister from './data/published-future-generation-register.json'
-import publishedRetirementRegister from './data/published-retirement-register.json'
 import { filterPlants, loadWorkspaceStore, parsePlantBackup, parsePlantCsv, saveWorkspaceStore, type PortfolioWorkspaceStore, type WorkspaceStore } from './lib/workspace'
 import type { HorizonYear, NeedLayer, NetworkLayerOptions, PlaceResult, Plant, PortfolioId, WorkbookData } from './models'
 import { emptyWorkspaceFilters, type WorkspaceFilters as FilterState } from './models'
@@ -22,41 +18,21 @@ type Theme = 'light' | 'dark'
 type PortfolioView = 'map' | 'register'
 type WorkspaceArea = PortfolioId | 'timeline' | 'quality'
 
-const isWorkbookData = (value: unknown): value is WorkbookData => Boolean(value) && typeof value === 'object' && Array.isArray((value as WorkbookData).plants) && Array.isArray((value as WorkbookData).riskNodes) && typeof (value as WorkbookData).importedFileName === 'string'
-const publishedWorkbook = (value: unknown, fallback: WorkbookData) => isWorkbookData(value) ? value : fallback
-const publishedRegisterId = (portfolio: PortfolioId, workbook: WorkbookData) => {
-  let hash = 2166136261
-  for (const character of JSON.stringify(workbook.plants)) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619)
-  return `${portfolio}-published-${(hash >>> 0).toString(36)}`
-}
-
 const portfolioDefinitions: Record<PortfolioId, { label: string, registerName: string, workbook: WorkbookData, description: string }> = {
-  retirement: { label: 'Retirement', registerName: 'Shared retirement register - 17 Jul 2026', workbook: publishedWorkbook(publishedRetirementRegister, defaultRegister), description: 'Published system retirement register' },
-  'future-generation': { label: 'Future Generation', registerName: 'Offshore wind prototype register', workbook: publishedWorkbook(publishedFutureGenerationRegister, futureGenerationRegister), description: 'Offshore wind projects and onshore grid connections' },
-  centrica: { label: 'Centrica', registerName: 'Centrica operational register', workbook: publishedWorkbook(publishedCentricaRegister, centricaRegister), description: 'Operational and AUC asset register' },
+  retirement: { label: 'Retirement', registerName: 'Shared retirement register - 17 Jul 2026', workbook: defaultRegister, description: 'Published system retirement register' },
+  'future-generation': { label: 'Future Generation', registerName: 'Offshore wind prototype register', workbook: futureGenerationRegister, description: 'Offshore wind projects and onshore grid connections' },
+  centrica: { label: 'Centrica', registerName: 'Centrica operational register', workbook: centricaRegister, description: 'Operational and AUC asset register' },
 }
 
 const isPortfolio = (area: WorkspaceArea): area is PortfolioId => area === 'retirement' || area === 'future-generation' || area === 'centrica'
 const createDefaultPortfolioStore = (portfolio: PortfolioId): PortfolioWorkspaceStore => {
   const definition = portfolioDefinitions[portfolio]
-  const id = publishedRegisterId(portfolio, definition.workbook)
+  const id = portfolio === 'retirement' ? 'retirement-owner-register' : portfolio === 'centrica' ? 'centrica-published-register' : `${portfolio}-published`
   return { activeRegisterId: id, registers: [{ id, name: definition.registerName, workbook: structuredClone(definition.workbook), savedAt: '' }] }
-}
-const isPublishedRegister = (register: { id: string, name: string }) => register.id.includes('published') || register.id.includes('owner-register') || register.id.includes('operational-register') || register.name.startsWith('Shared ') || register.name.startsWith('Centrica operational')
-const promotePublishedDefault = (portfolio: PortfolioId, previous?: PortfolioWorkspaceStore): PortfolioWorkspaceStore => {
-  const published = createDefaultPortfolioStore(portfolio)
-  if (!previous || previous.registers.some((register) => register.id === published.activeRegisterId)) return previous ?? published
-  const active = previous.registers.find((register) => register.id === previous.activeRegisterId) ?? previous.registers[0]
-  const activeIsPublished = Boolean(active) && isPublishedRegister(active)
-  const registers = [
-    ...published.registers,
-    ...previous.registers.map((register) => activeIsPublished && register.id === active.id ? { ...register, id: `${portfolio}-previous-${register.id}`, name: `${register.name} (previous baseline)` } : register),
-  ]
-  return { activeRegisterId: activeIsPublished ? published.activeRegisterId : previous.activeRegisterId, registers }
 }
 const createInitialWorkspaceStore = (): WorkspaceStore => {
   const stored = loadWorkspaceStore()
-  return { portfolios: { retirement: promotePublishedDefault('retirement', stored?.portfolios.retirement), 'future-generation': promotePublishedDefault('future-generation', stored?.portfolios['future-generation']), centrica: promotePublishedDefault('centrica', stored?.portfolios.centrica) } }
+  return { portfolios: { retirement: stored?.portfolios.retirement ?? createDefaultPortfolioStore('retirement'), 'future-generation': stored?.portfolios['future-generation'] ?? createDefaultPortfolioStore('future-generation'), centrica: stored?.portfolios.centrica ?? createDefaultPortfolioStore('centrica') } }
 }
 
 export default function App() {
@@ -74,7 +50,6 @@ export default function App() {
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult>()
   const [theme, setTheme] = useState<Theme>(() => localStorage.getItem('grid-stability-theme') === 'dark' ? 'dark' : 'light')
   const [saveCopyOpen, setSaveCopyOpen] = useState(false)
-  const [publishOpen, setPublishOpen] = useState(false)
   const [newRegisterName, setNewRegisterName] = useState('')
   const [qualityPortfolio, setQualityPortfolio] = useState<PortfolioId | 'all'>('all')
   const backupInputRef = useRef<HTMLInputElement>(null)
@@ -164,9 +139,8 @@ export default function App() {
   })
 
   return <main className={`app-shell theme-${theme}`}>
-    <header className="app-header"><div className="brand-lockup"><span className="brand-mark">UK</span><div><p>Electricity system analysis</p><h1>Grid Stability Map</h1></div></div><div className="import-actions">{isPortfolio(area) && <><span className="save-indicator" role="status" title="Changes made in this browser are saved locally."><Check size={14} />{savedLabel}</span><label className="register-picker" title="Choose a sample register or local copy"><Database size={15} /><select value={activeStore.activeRegisterId} onChange={(event) => selectRegister(event.target.value)} aria-label="Active register">{activeStore.registers.map((register) => <option key={register.id} value={register.id}>{register.name}</option>)}</select></label><button className="icon-text-button backup-button" type="button" onClick={openRegisterSave} title="Save the current register as a named internal copy"><Save size={16} />Save copy</button><input ref={mergeInputRef} type="file" accept="text/csv,.csv" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void mergeCsvRegister(file) }} /><button className="icon-text-button backup-button" type="button" onClick={() => mergeInputRef.current?.click()} title="Merge a CSV into a new internal register copy"><FilePlus2 size={16} />Merge CSV</button><input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void restoreRegister(file) }} /><button className="icon-text-button backup-button" type="button" onClick={() => backupInputRef.current?.click()} title="Replace this browser's register with a backup JSON file"><Upload size={16} />Restore data</button><button className="icon-text-button backup-button" type="button" onClick={downloadRegister} title="Download all current portfolio data"><Download size={16} />Backup data</button><button className="icon-text-button backup-button" type="button" onClick={() => setPublishOpen(true)} title="Submit the current register as a GitHub pull request"><GitPullRequest size={16} />Publish</button></>}<button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button></div></header>
+    <header className="app-header"><div className="brand-lockup"><span className="brand-mark">UK</span><div><p>Electricity system analysis</p><h1>Grid Stability Map</h1></div></div><div className="import-actions">{isPortfolio(area) && <><span className="save-indicator" role="status" title="Changes made in this browser are saved locally."><Check size={14} />{savedLabel}</span><label className="register-picker" title="Choose a sample register or local copy"><Database size={15} /><select value={activeStore.activeRegisterId} onChange={(event) => selectRegister(event.target.value)} aria-label="Active register">{activeStore.registers.map((register) => <option key={register.id} value={register.id}>{register.name}</option>)}</select></label><button className="icon-text-button backup-button" type="button" onClick={openRegisterSave} title="Save the current register as a named internal copy"><Save size={16} />Save copy</button><input ref={mergeInputRef} type="file" accept="text/csv,.csv" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void mergeCsvRegister(file) }} /><button className="icon-text-button backup-button" type="button" onClick={() => mergeInputRef.current?.click()} title="Merge a CSV into a new internal register copy"><FilePlus2 size={16} />Merge CSV</button><input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void restoreRegister(file) }} /><button className="icon-text-button backup-button" type="button" onClick={() => backupInputRef.current?.click()} title="Replace this browser's register with a backup JSON file"><Upload size={16} />Restore data</button><button className="icon-text-button backup-button" type="button" onClick={downloadRegister} title="Download all current portfolio data"><Download size={16} />Backup data</button></>}<button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button></div></header>
     {saveCopyOpen && <div className="modal-backdrop"><form className="save-register-dialog" onSubmit={(event) => { event.preventDefault(); createRegisterSave() }}><header><div><p>Internal register</p><h2>Save register copy</h2></div><button className="close-button" type="button" onClick={() => setSaveCopyOpen(false)} aria-label="Close save register dialog"><X size={16} /></button></header><label>Register name<input value={newRegisterName} onChange={(event) => setNewRegisterName(event.target.value)} autoFocus /></label><footer><button className="secondary-action" type="button" onClick={() => setSaveCopyOpen(false)}>Cancel</button><button className="primary-action" type="submit"><Save size={16} />Save copy</button></footer></form></div>}
-    {publishOpen && <GitHubPublishDialog portfolio={activePortfolio} registerName={activeRegister.name} workbook={workbook} onClose={() => setPublishOpen(false)} />}
     <nav className="workspace-tabs" aria-label="Workspace areas">{tabs.map((tab) => { const Icon = tab.icon; return <button key={tab.id} type="button" className={area === tab.id ? 'active' : ''} onClick={() => selectArea(tab.id)}><Icon size={16} />{tab.label}</button> })}</nav>
     {isPortfolio(area) && <nav className="portfolio-tabs" aria-label={`${portfolioDefinitions[activePortfolio].label} views`}><span>{portfolioDefinitions[activePortfolio].description}</span>{([{ id: 'map', label: 'Map', icon: Map }, { id: 'register', label: 'Register', icon: TableProperties }] as const).map((tab) => { const Icon = tab.icon; return <button key={tab.id} type="button" className={portfolioView === tab.id ? 'active' : ''} onClick={() => selectPortfolioView(tab.id)}><Icon size={15} />{tab.label}</button> })}</nav>}
     {isPortfolio(area) && portfolioView === 'map' && <section className="control-bar" aria-label="Map controls"><MapPlaceSearch plants={workbook.plants} onSelect={(place) => { setSelectedPlace(place); if (place.registeredPlant) setSelectedPlant(place.registeredPlant) }} /><div className="segmented-control" aria-label={activePortfolio === 'future-generation' ? 'Commissioning horizon' : 'Retirement horizon'}>{years.map((option) => <button key={option} type="button" className={option === year ? 'active' : ''} onClick={() => setYear(option)}>{option}</button>)}</div>{activePortfolio !== 'future-generation' && <div className="need-control" aria-label="Stability screening overlay"><span>Need overlay</span>{([{ id: 'none', label: 'Off' }, { id: 'inertia', label: 'Inertia' }, { id: 'scl', label: 'SCL' }, { id: 'voltage', label: 'Voltage' }] as const).map((layer) => <button key={layer.id} type="button" className={needLayer === layer.id ? 'active' : ''} onClick={() => setNeedLayer(layer.id)}>{layer.label}</button>)}</div>}{activePortfolio !== 'future-generation' && needLayer !== 'none' && <label className="heat-opacity-control">Heat <input type="range" min="20" max="100" step="5" value={heatOpacity} onChange={(event) => setHeatOpacity(Number(event.target.value))} aria-label="Heatmap opacity" /><output>{heatOpacity}%</output></label>}<button className={`network-layer-toggle ${networkLayer ? 'active' : ''}`} type="button" onClick={() => setNetworkLayer((current) => !current)} title="Show OpenStreetMap lines and substations"><Network size={15} />Network</button>{networkLayer && <div className="network-options" aria-label="Network data filters">{([{ id: 'transmission', label: '220+ kV' }, { id: 'substations', label: 'Substations' }, { id: 'lowerVoltage', label: '110/132 kV' }, { id: 'future', label: 'Future' }] as const).map((option) => <button key={option.id} type="button" className={networkOptions[option.id] ? 'active' : ''} aria-pressed={networkOptions[option.id]} onClick={() => setNetworkOptions((current) => ({ ...current, [option.id]: !current[option.id] }))}>{option.label}</button>)}</div>}</section>}

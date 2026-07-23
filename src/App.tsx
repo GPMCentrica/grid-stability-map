@@ -44,7 +44,16 @@ const createInitialWorkspaceStore = (): WorkspaceStore => {
     : previousCentrica ?? createDefaultPortfolioStore('centrica')
   const previousFuture = stored?.portfolios['future-generation']
   const containsPlaceholderFutureRegister = previousFuture?.registers.some((register) => register.workbook.plants.some((plant) => plant.assetId === 'FUT-SAMPLE-001' || plant.assetId === 'FUT-SAMPLE-002'))
-  const futureGeneration = containsPlaceholderFutureRegister ? createDefaultPortfolioStore('future-generation') : previousFuture ?? createDefaultPortfolioStore('future-generation')
+  const defaultFutureGeneration = createDefaultPortfolioStore('future-generation')
+  const futureGeneration = containsPlaceholderFutureRegister ? defaultFutureGeneration : previousFuture ? {
+    ...previousFuture,
+    registers: previousFuture.registers.map((register) => {
+      if (register.id !== 'future-generation-published') return register
+      const existingIds = new Set(register.workbook.plants.map((plant) => plant.assetId))
+      const missingProjects = defaultFutureGeneration.registers[0].workbook.plants.filter((plant) => !existingIds.has(plant.assetId))
+      return missingProjects.length ? { ...register, workbook: { ...register.workbook, plants: [...register.workbook.plants, ...missingProjects] } } : register
+    }),
+  } : defaultFutureGeneration
   return { portfolios: { retirement, 'future-generation': futureGeneration, centrica } }
 }
 

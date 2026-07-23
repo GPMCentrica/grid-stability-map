@@ -23,6 +23,11 @@ export interface PlaceResult extends Coordinates {
   registeredPlant?: Plant
 }
 
+export interface GenerationConnection extends Coordinates {
+  nodeName: string
+  certainty: 'confirmed' | 'estimated'
+}
+
 export interface Plant extends Coordinates {
   assetId: string
   name: string
@@ -33,7 +38,10 @@ export interface Plant extends Coordinates {
   technology: string
   netMw: number
   ownerGroup?: string
+  projectLocation?: string
   projectStatus?: 'Proposed' | 'Consented' | 'Under construction' | 'Operational'
+  expectedYearCertainty?: 'high' | 'medium' | 'reasonable'
+  connections?: GenerationConnection[]
   commissioningDate?: string
   commissioningBasis?: RetirementBasis
   modelledCommissioningYear?: number

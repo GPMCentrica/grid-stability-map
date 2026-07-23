@@ -1,11 +1,11 @@
 import { divIcon } from 'leaflet'
 import L from 'leaflet'
 import { useEffect, useState } from 'react'
-import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet.vectorgrid'
 import { getLocationNeeds } from '../lib/need'
 import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, PortfolioId, RetiredAssetMode } from '../models'
-import { commissioningLabel, effectiveCommissioningYear, effectiveRetirementYear, formatMw, retirementLabel, technologyColour } from '../lib/risk'
+import { effectiveCommissioningYear, effectiveRetirementYear, formatMw, retirementLabel, technologyColour } from '../lib/risk'
 
 interface MapViewProps {
   plants: Plant[]
@@ -167,7 +167,7 @@ function plantIcon(plant: Plant) {
 function lifespanOpacity(plant: Plant, year: HorizonYear, portfolio: PortfolioId) {
   if (portfolio === 'future-generation') {
     const commissioningYear = effectiveCommissioningYear(plant)
-    return commissioningYear && commissioningYear > year ? 0.45 : 1
+    return commissioningYear && commissioningYear > year ? 0.18 : 1
   }
   const retirementYear = effectiveRetirementYear(plant)
   if (!retirementYear) return 1
@@ -183,6 +183,20 @@ function MapClickDeselect({ onDeselect }: { onDeselect: () => void }) {
 }
 
 function PlantPopup({ plant, portfolio }: { plant: Plant, portfolio: PortfolioId }) {
+  if (portfolio === 'future-generation') return (
+    <div className="popup-content">
+      <p className="popup-kicker">Offshore wind project</p>
+      <h3>{plant.name}</h3>
+      <dl>
+        <div><dt>Location</dt><dd>{plant.projectLocation || plant.region}</dd></div>
+        <div><dt>Developers</dt><dd>{plant.ownerGroup || 'Not recorded'}</dd></div>
+        <div><dt>Capacity</dt><dd>{formatMw(plant.netMw)}</dd></div>
+        <div><dt>Status</dt><dd>{plant.projectStatus || 'Not recorded'}</dd></div>
+        <div><dt>Expected online</dt><dd>{effectiveCommissioningYear(plant) ?? 'Not recorded'}</dd></div>
+        <div><dt>Year certainty</dt><dd>{plant.expectedYearCertainty || 'Not recorded'}</dd></div>
+      </dl>
+    </div>
+  )
   return (
     <div className="popup-content">
       <p className="popup-kicker">Generation asset</p>
@@ -193,11 +207,26 @@ function PlantPopup({ plant, portfolio }: { plant: Plant, portfolio: PortfolioId
         <div><dt>Asset owner</dt><dd>{plant.ownerGroup || 'Not recorded'}</dd></div>
         <div><dt>Region</dt><dd>{plant.region || 'Not recorded'}</dd></div>
         <div><dt>Node / Substation</dt><dd>{plant.nodeName || plant.nodeId}</dd></div>
-        <div><dt>{portfolio === 'future-generation' ? 'Commissioning outlook' : 'Retirement outlook'}</dt><dd>{portfolio === 'future-generation' ? commissioningLabel(plant) : retirementLabel(plant)}</dd></div>
+        <div><dt>Retirement outlook</dt><dd>{retirementLabel(plant)}</dd></div>
         <div><dt>Confidence Score</dt><dd>{plant.confidenceScore ?? 'Not recorded'}</dd></div>
       </dl>
     </div>
   )
+}
+
+function FutureConnections({ plants, year }: { plants: Plant[], year: HorizonYear }) {
+  return plants.flatMap((plant) => {
+    const opacity = lifespanOpacity(plant, year, 'future-generation')
+    return (plant.connections ?? []).flatMap((connection, index) => {
+      const key = `${plant.assetId}-${connection.nodeName}-${index}`
+      return [
+        <Polyline key={`${key}-line`} positions={[[plant.latitude, plant.longitude], [connection.latitude, connection.longitude]]} pathOptions={{ color: '#0f2067', weight: 2.5, opacity: opacity * 0.78, dashArray: connection.certainty === 'estimated' ? '7 7' : undefined }} />,
+        <CircleMarker key={`${key}-node`} center={[connection.latitude, connection.longitude]} radius={6} pathOptions={{ color: '#ffffff', weight: 2, fillColor: '#a50091', fillOpacity: opacity, opacity }}>
+          <Popup><div className="popup-content connection-popup"><p className="popup-kicker">Onshore connection</p><h3>{connection.nodeName}</h3><dl><div><dt>Offshore project</dt><dd>{plant.name}</dd></div><div><dt>Connection certainty</dt><dd>{connection.certainty}</dd></div><div><dt>Expected online</dt><dd>{effectiveCommissioningYear(plant) ?? 'Not recorded'}</dd></div></dl></div></Popup>
+        </CircleMarker>,
+      ]
+    })
+  })
 }
 
 export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, heatOpacity, networkLayer, networkOptions, portfolio, focusedPlant, focusedPlace, onPlantSelect }: MapViewProps) {
@@ -218,6 +247,7 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, he
       <MapClickDeselect onDeselect={() => onPlantSelect()} />
       <NetworkOverlay enabled={networkLayer} options={networkOptions} />
       {activeNeedLayer && <NeedHeatmap layer={activeNeedLayer} opacity={heatOpacity} points={locationNeeds.map((location) => ({ latitude: location.latitude, longitude: location.longitude, intensity: Math.sqrt(location.need * location.retiringService / largestServiceLoss) / largestLocationalImportance }))} />}
+      {portfolio === 'future-generation' && <FutureConnections plants={visiblePlants} year={year} />}
       {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year, portfolio)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} portfolio={portfolio} /></Popup></Marker>)}
     </MapContainer>
   )

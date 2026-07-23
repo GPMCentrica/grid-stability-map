@@ -2,6 +2,7 @@ export type HorizonYear = 2026 | 2030 | 2040 | 2050
 export type RiskLevel = 'low' | 'medium' | 'high'
 export type RetiredAssetMode = 'hide' | 'fade'
 export type PlantStatus = 'Active' | 'Retiring' | 'Retired' | 'Archived'
+export type PortfolioId = 'retirement' | 'future-generation' | 'centrica'
 export type NeedLayer = 'none' | 'inertia' | 'scl' | 'voltage'
 export interface NetworkLayerOptions {
   transmission: boolean
@@ -31,6 +32,12 @@ export interface Plant extends Coordinates {
   country?: string
   technology: string
   netMw: number
+  ownerGroup?: string
+  projectStatus?: 'Proposed' | 'Consented' | 'Under construction' | 'Operational'
+  commissioningDate?: string
+  commissioningBasis?: RetirementBasis
+  modelledCommissioningYear?: number
+  modelledCommissioningReason?: string
   retirementDate?: string
   retirementBasis?: RetirementBasis
   modelledRetirementYear?: number

@@ -1,6 +1,6 @@
-import type { Plant, WorkbookData, WorkspaceFilters } from '../models'
+import type { Plant, PortfolioId, WorkbookData, WorkspaceFilters } from '../models'
 
-const storageKey = 'uk-grid-stability-workspace-v4'
+const storageKey = 'uk-grid-stability-workspace-v5'
 
 const requiredPlantFields = ['assetId', 'name', 'nodeId', 'nodeName', 'region', 'technology'] as const
 
@@ -14,9 +14,13 @@ export interface SavedRegister extends WorkspaceSnapshot {
   name: string
 }
 
-export interface WorkspaceStore {
+export interface PortfolioWorkspaceStore {
   activeRegisterId: string
   registers: SavedRegister[]
+}
+
+export interface WorkspaceStore {
+  portfolios: Partial<Record<PortfolioId, PortfolioWorkspaceStore>>
 }
 
 function parseWorkspaceSnapshot(value: unknown): WorkspaceSnapshot | undefined {
@@ -27,16 +31,25 @@ function parseWorkspaceSnapshot(value: unknown): WorkspaceSnapshot | undefined {
 
 export function loadWorkspaceStore(): WorkspaceStore | undefined {
   try {
-    const stored = localStorage.getItem(storageKey)
+    const stored = localStorage.getItem(storageKey) ?? localStorage.getItem('uk-grid-stability-workspace-v4')
     if (!stored) return undefined
-    const parsed = JSON.parse(stored) as WorkspaceStore | WorkbookData | WorkspaceSnapshot
+    const parsed = JSON.parse(stored) as WorkspaceStore | PortfolioWorkspaceStore | WorkbookData | WorkspaceSnapshot
+    if ('portfolios' in parsed && parsed.portfolios && typeof parsed.portfolios === 'object') {
+      const portfolios = Object.fromEntries((['retirement', 'future-generation', 'centrica'] as PortfolioId[]).flatMap((portfolio) => {
+        const candidate = parsed.portfolios[portfolio]
+        if (!candidate || !Array.isArray(candidate.registers) || typeof candidate.activeRegisterId !== 'string') return []
+        const registers = candidate.registers.filter((register): register is SavedRegister => Boolean(register) && typeof register.id === 'string' && typeof register.name === 'string' && Boolean(parseWorkspaceSnapshot(register)))
+        if (!registers.length) return []
+        return [[portfolio, { activeRegisterId: registers.some((register) => register.id === candidate.activeRegisterId) ? candidate.activeRegisterId : registers[0].id, registers }]]
+      })) as Partial<Record<PortfolioId, PortfolioWorkspaceStore>>
+      return Object.keys(portfolios).length ? { portfolios } : undefined
+    }
     if ('registers' in parsed && Array.isArray(parsed.registers) && typeof parsed.activeRegisterId === 'string') {
       const registers = parsed.registers.filter((register): register is SavedRegister => Boolean(register) && typeof register.id === 'string' && typeof register.name === 'string' && Boolean(parseWorkspaceSnapshot(register)))
-      if (registers.some((register) => register.id === parsed.activeRegisterId)) return { activeRegisterId: parsed.activeRegisterId, registers }
-      return registers.length ? { activeRegisterId: registers[0].id, registers } : undefined
+      if (registers.length) return { portfolios: { retirement: { activeRegisterId: registers.some((register) => register.id === parsed.activeRegisterId) ? parsed.activeRegisterId : registers[0].id, registers } } }
     }
     const snapshot = 'workbook' in parsed ? parseWorkspaceSnapshot(parsed) : { workbook: parsed as WorkbookData, savedAt: '' }
-    return snapshot ? { activeRegisterId: 'published-register', registers: [{ id: 'published-register', name: 'Shared register - 17 Jul 2026', ...snapshot }] } : undefined
+    return snapshot ? { portfolios: { retirement: { activeRegisterId: 'published-register', registers: [{ id: 'published-register', name: 'Shared register - 17 Jul 2026', ...snapshot }] } } } : undefined
   } catch {
     return undefined
   }
@@ -104,6 +117,12 @@ export async function parsePlantCsv(text: string): Promise<Plant[]> {
       region: csvText(row, 'region', recordNumber, true),
       technology: csvText(row, 'technology', recordNumber, true),
       netMw: csvNumber(row, 'net_mw', recordNumber, true)!,
+      ownerGroup: csvText(row, 'owner_group', recordNumber) || undefined,
+      projectStatus: csvText(row, 'project_status', recordNumber) as Plant['projectStatus'],
+      commissioningDate: csvText(row, 'commissioning_date', recordNumber) || undefined,
+      commissioningBasis: csvText(row, 'commissioning_basis', recordNumber) as Plant['commissioningBasis'],
+      modelledCommissioningYear: csvNumber(row, 'modelled_commissioning_year', recordNumber),
+      modelledCommissioningReason: csvText(row, 'modelled_commissioning_reason', recordNumber) || undefined,
       status: status as Plant['status'],
       latitude: latitude!,
       longitude: longitude!,

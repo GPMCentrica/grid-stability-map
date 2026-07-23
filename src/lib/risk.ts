@@ -18,10 +18,23 @@ export function effectiveRetirementYear(plant: Plant) {
   return undefined
 }
 
+export function effectiveCommissioningYear(plant: Plant) {
+  if (plant.commissioningBasis === 'Modelled') return plant.modelledCommissioningYear
+  if (plant.commissioningDate) return Number(plant.commissioningDate.slice(0, 4))
+  return undefined
+}
+
 export function retirementLabel(plant: Plant) {
   if (plant.retirementBasis === 'Modelled' && plant.modelledRetirementYear) return `Modelled ${plant.modelledRetirementYear}`
   if (plant.retirementBasis === 'Confirmed' && plant.retirementDate) return `Confirmed ${plant.retirementDate}`
   if (plant.retirementDate) return `Modelled ${plant.retirementDate.slice(0, 4)}`
+  return 'Unconfirmed'
+}
+
+export function commissioningLabel(plant: Plant) {
+  if (plant.commissioningBasis === 'Modelled' && plant.modelledCommissioningYear) return `Modelled ${plant.modelledCommissioningYear}`
+  if (plant.commissioningBasis === 'Confirmed' && plant.commissioningDate) return `Confirmed ${plant.commissioningDate}`
+  if (plant.commissioningDate) return `Modelled ${plant.commissioningDate.slice(0, 4)}`
   return 'Unconfirmed'
 }
 

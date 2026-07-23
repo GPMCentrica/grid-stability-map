@@ -17,20 +17,31 @@ GitHub Pages hosts a static site. The version-controlled JSON register is the co
 - Provides plant and node popups, horizon dashboard metrics, register and map search, plus a retirement timeline.
 - Displays optional relative Inertia, SCL, and Voltage screening overlays and an optional OpenInfraMap network layer.
 
+## Portfolio workspaces
+
+The main navigation has five areas: **Retirement**, **Future Generation**, **Centrica**, **Timeline**, and **Data quality**. Retirement, Future Generation, and Centrica each provide the same Map and Register views, with separate browser-local register copies and backups.
+
+- **Retirement** uses the published 17 July 2026 system retirement register and retains the retirement-driven screening overlays.
+- **Future Generation** starts with two clearly labelled sample projects. Its register records project status and confirmed or modelled commissioning timing; replace or add to these samples with governed project data.
+- **Centrica** starts with two clearly labelled sample assets. Replace or add to these samples with current Centrica ownership data.
+- **Timeline** compares the active Retirement register's scheduled capacity loss with the active Future Generation register's expected commissioning capacity. Centrica is a separate portfolio view and is not added to avoid double counting.
+- **Data quality** can review all portfolios together or one portfolio at a time, and opens a matching record in its own register editor.
+
 ## Local workflow
 
-The application is a retirement-register workspace. Use the four application areas for routine analysis and scenario work:
+The application is a portfolio-register workspace. Use the five application areas for routine analysis and scenario work:
 
-- **Map**: inspect retirement locations, capacity by planning horizon, and the selected location's retirement timeline.
-- **Register**: filter records, add or edit plants, duplicate a similar record, archive obsolete records, or permanently delete local records.
-- **Timeline**: view annual and cumulative retirement capacity for the records matching the current filters.
-- **Data quality**: resolve missing retirement dates or coordinates, low-confidence records, duplicate names, and inconsistent node labels.
+- **Retirement**: inspect retirement locations, capacity by planning horizon, and retirement-driven screening overlays.
+- **Future Generation**: maintain planned generation projects, their capacity, location, and expected commissioning timing.
+- **Centrica**: maintain the current Centrica-owned asset portfolio using the same map and register pattern.
+- **Timeline**: compare annual retirement capacity with future commissioning capacity and their net change.
+- **Data quality**: resolve timing, coordinate, confidence, duplicate-name, and node-label issues across the selected portfolio.
 
 The default active register is the **Shared register - 17 Jul 2026** published with the GitHub Pages site. It contains 53 records covering Great Britain, Northern Ireland, and the Republic of Ireland, so everyone opening the deployed site starts from the same communal baseline. Its authoritative source is [src/data/plant-register-2026-07-17.json](src/data/plant-register-2026-07-17.json). [src/data/default-register.ts](src/data/default-register.ts) is the generated copy consumed by the app and must not be edited manually.
 
 Use the header's register selector to switch between the shared baseline and local saved copies. **Save copy** creates a named local register from the current data, and subsequent edits are saved automatically to that selected register. **Merge CSV** validates a plant-register CSV and creates a separate combined local register, adding new asset IDs and updating matching ones without changing the shared source register. **Restore data** replaces the selected local register from a JSON backup after confirmation; **Backup data** downloads the current register as JSON.
 
-Local registers are stored only in the current browser profile and device through `localStorage` (`uk-grid-stability-workspace-v4`). Clear browser storage, switch browser/profile, or use another device and those local scenarios will not be available unless exported first. The versioned storage key deliberately ignores older browser workspaces so a newly published baseline becomes active; change it only for a planned baseline migration and tell users to export any local scenarios first.
+Local registers are stored only in the current browser profile and device through `localStorage` (`uk-grid-stability-workspace-v5`). Clear browser storage, switch browser/profile, or use another device and those local scenarios will not be available unless exported first. The versioned storage key migrates an older v4 retirement workspace into the Retirement portfolio when it is first opened; Future Generation and Centrica then start with their editable sample registers.
 
 ## Published register maintenance
 

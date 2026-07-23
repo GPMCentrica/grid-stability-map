@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet.vectorgrid'
 import { getLocationNeeds, needColour, needLabel } from '../lib/need'
-import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, RetiredAssetMode } from '../models'
-import { effectiveRetirementYear, formatMw, retirementLabel, technologyColour } from '../lib/risk'
+import type { Coordinates, HorizonYear, NeedLayer, NetworkLayerOptions, Plant, PortfolioId, RetiredAssetMode } from '../models'
+import { commissioningLabel, effectiveCommissioningYear, effectiveRetirementYear, formatMw, retirementLabel, technologyColour } from '../lib/risk'
 
 interface MapViewProps {
   plants: Plant[]
@@ -15,6 +15,7 @@ interface MapViewProps {
   heatOpacity: number
   networkLayer: boolean
   networkOptions: NetworkLayerOptions
+  portfolio: PortfolioId
   focusedPlant?: Plant
   focusedPlace?: Coordinates
   onPlantSelect: (plant?: Plant) => void
@@ -163,7 +164,11 @@ function plantIcon(plant: Plant) {
   })
 }
 
-function lifespanOpacity(plant: Plant, year: HorizonYear) {
+function lifespanOpacity(plant: Plant, year: HorizonYear, portfolio: PortfolioId) {
+  if (portfolio === 'future-generation') {
+    const commissioningYear = effectiveCommissioningYear(plant)
+    return commissioningYear && commissioningYear > year ? 0.45 : 1
+  }
   const retirementYear = effectiveRetirementYear(plant)
   if (!retirementYear) return 1
   if (!Number.isFinite(retirementYear)) return 1
@@ -177,7 +182,7 @@ function MapClickDeselect({ onDeselect }: { onDeselect: () => void }) {
   return null
 }
 
-function PlantPopup({ plant }: { plant: Plant }) {
+function PlantPopup({ plant, portfolio }: { plant: Plant, portfolio: PortfolioId }) {
   return (
     <div className="popup-content">
       <p className="popup-kicker">Generation asset</p>
@@ -187,14 +192,14 @@ function PlantPopup({ plant }: { plant: Plant }) {
         <div><dt>Net MW</dt><dd>{formatMw(plant.netMw)}</dd></div>
         <div><dt>Region</dt><dd>{plant.region || 'Not recorded'}</dd></div>
         <div><dt>Node / Substation</dt><dd>{plant.nodeName || plant.nodeId}</dd></div>
-        <div><dt>Retirement outlook</dt><dd>{retirementLabel(plant)}</dd></div>
+        <div><dt>{portfolio === 'future-generation' ? 'Commissioning outlook' : 'Retirement outlook'}</dt><dd>{portfolio === 'future-generation' ? commissioningLabel(plant) : retirementLabel(plant)}</dd></div>
         <div><dt>Confidence Score</dt><dd>{plant.confidenceScore ?? 'Not recorded'}</dd></div>
       </dl>
     </div>
   )
 }
 
-export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, heatOpacity, networkLayer, networkOptions, focusedPlant, focusedPlace, onPlantSelect }: MapViewProps) {
+export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, heatOpacity, networkLayer, networkOptions, portfolio, focusedPlant, focusedPlace, onPlantSelect }: MapViewProps) {
   const visiblePlants = plants
   const activeNeedLayer = needLayer === 'none' ? undefined : needLayer
   const locationNeeds = activeNeedLayer ? getLocationNeeds(plants, year, activeNeedLayer) : []
@@ -226,7 +231,7 @@ export function MapView({ plants, year, retiredMode: _retiredMode, needLayer, he
           <Popup><div className="popup-content"><p className="popup-kicker">{layerLabel} screening</p><h3>{location.nodeName}</h3><dl><div><dt>Screening need</dt><dd>{needLabel(location.need)}</dd></div><div><dt>Relative locational importance</dt><dd>{Math.round(locationalImportance * 100)}%</dd></div><div><dt>Estimated provision lost</dt><dd>{new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(location.retiringService)} {serviceUnit}</dd></div><div><dt>Retiring by {year}</dt><dd>{formatMw(location.retiringMw)}</dd></div><div><dt>Heat spread assumption</dt><dd>~{localityVisual.bandKm} km</dd></div><div><dt>Basis</dt><dd>Technology and locality assumptions</dd></div></dl></div></Popup>
         </CircleMarker>
       })}
-      {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} /></Popup></Marker>)}
+      {visiblePlants.map((plant) => <Marker key={plant.assetId} position={[plant.latitude, plant.longitude]} icon={plantIcon(plant)} opacity={lifespanOpacity(plant, year, portfolio)} eventHandlers={{ click: () => onPlantSelect(plant) }}><Popup><PlantPopup plant={plant} portfolio={portfolio} /></Popup></Marker>)}
     </MapContainer>
   )
 }
